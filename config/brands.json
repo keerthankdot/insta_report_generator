@@ -1,0 +1,30 @@
+{
+  "brands": [
+    {
+      "name": "Tinder",
+      "ig_account": "tinder",
+      "x_handle": "Tinder",
+      "color": "#FF6B6B",
+      "goals": {
+        "weekly_posts": 7,
+        "weekly_reach": 75000,
+        "monthly_posts": 28,
+        "monthly_reach": 300000,
+        "engagement_rate": 5.0
+      }
+    },
+    {
+      "name": "Dunkin",
+      "ig_account": "dunkin",
+      "x_handle": "dunaborecek",
+      "color": "#FF6600",
+      "goals": {
+        "weekly_posts": 5,
+        "weekly_reach": 50000,
+        "monthly_posts": 20,
+        "monthly_reach": 200000,
+        "engagement_rate": 4.0
+      }
+    }
+  ]
+}

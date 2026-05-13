@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "email": "am@thenewthing.in",
+      "password": "helloworld",
+      "name": "TNT Account Manager",
+      "role": "am"
+    },
+    {
+      "email": "keerthan@ascnd.co",
+      "password": "admin2026",
+      "name": "Keerthan",
+      "role": "am"
+    },
+    {
+      "email": "creative@thenewthing.in",
+      "password": "helloworld",
+      "name": "TNT Creative Team",
+      "role": "creative"
+    }
+  ]
+}

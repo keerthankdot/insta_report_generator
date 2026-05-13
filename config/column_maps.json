@@ -1,0 +1,30 @@
+{
+  "instagram": {
+    "date": ["Published", "Publish time", "Date published", "Date", "publish_time", "date"],
+    "post_id": ["Post ID", "post_id", "id", "ID"],
+    "content_type": ["Type", "Content type", "content_type", "Media type", "media_type"],
+    "caption": ["Title", "Post title", "Caption", "Description", "title", "caption"],
+    "reach": ["Reach", "Organic reach", "reach", "organic_reach", "Accounts reached"],
+    "views": ["Impressions", "Views", "impressions", "views", "Total impressions"],
+    "likes": ["Likes", "Reactions", "likes", "reactions", "Like count"],
+    "comments": ["Comments", "comments", "Comment count"],
+    "shares": ["Shares", "shares", "Share count"],
+    "saves": ["Saves", "saves", "Save count"],
+    "follows": ["Follows", "follows", "Follow count"],
+    "permalink": ["Permalink", "Post link", "permalink", "URL", "url", "Link"]
+  },
+  "x": {
+    "date": ["time", "date", "created_at", "Date", "Created At", "Timestamp", "Tweet date"],
+    "post_id": ["Tweet id", "id", "ID", "Tweet ID", "tweet_id"],
+    "text": ["Tweet text", "text", "Tweet", "Content", "Full Text", "tweet_text"],
+    "impressions": ["impressions", "Impressions", "Views", "View Count", "views"],
+    "engagements": ["engagements", "Engagements", "Total engagements"],
+    "engagement_rate": ["engagement rate", "Engagement rate", "Engagement Rate"],
+    "likes": ["likes", "Likes", "favorites", "Favorites", "Favorite Count", "Like Count"],
+    "retweets": ["retweets", "Retweets", "Retweet Count", "reposts", "Reposts"],
+    "replies": ["replies", "Replies", "Reply Count"],
+    "url_clicks": ["url clicks", "URL clicks", "link clicks", "Link clicks", "Link Click Count"],
+    "profile_clicks": ["user profile clicks", "profile clicks", "Profile clicks"],
+    "permalink": ["Tweet permalink", "permalink", "Permalink", "URL", "Tweet URL"]
+  }
+}
