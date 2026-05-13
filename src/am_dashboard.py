@@ -543,37 +543,61 @@ def render(user: dict) -> None:
         st.session_state.nav = "home"
     nav = st.session_state.nav
 
-    # ── 1. Hide Streamlit sidebar + shift main content ──
-    st.markdown(
-        """
-        <style>
-            section[data-testid="stSidebar"]  { display: none !important; }
-            [data-testid="stSidebarCollapseButton"],
-            [data-testid="collapsedControl"]  { display: none !important; }
-            /* Offset main content to clear our 64px custom sidebar */
-            [data-testid="stMain"] { margin-left: 64px !important; }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+    # ── Sidebar: native Streamlit — buttons guaranteed to work ──
+    st.markdown("""
+    <style>
+        [data-testid="stSidebarCollapseButton"],
+        [data-testid="collapsedControl"] { display: none !important; }
+        section[data-testid="stSidebar"] {
+            background: #13151f !important;
+            border-right: 1px solid rgba(255,255,255,0.07) !important;
+        }
+        section[data-testid="stSidebar"] .stMarkdown p {
+            font-size: 0.78rem; font-weight: 800;
+            color: #fff; letter-spacing: 0.06em;
+        }
+        section[data-testid="stSidebar"] [data-testid="stButton"] button {
+            border: none !important;
+            border-radius: 7px !important;
+            background: transparent !important;
+            color: rgba(255,255,255,0.6) !important;
+            font-size: 0.875rem !important;
+            text-align: left !important;
+            justify-content: flex-start !important;
+            padding: 10px 12px !important;
+            width: 100% !important;
+        }
+        section[data-testid="stSidebar"] [data-testid="stButton"] button:hover {
+            background: rgba(255,255,255,0.08) !important;
+            color: #fff !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-    # ── 2. Hidden trigger buttons live inside the hidden sidebar ──
-    #    display:none elements can still be .click()-ed via JavaScript.
     with st.sidebar:
-        if st.button("__home__", key="nav_home"):
+        st.markdown("**TNT · The New Thing**")
+        st.divider()
+
+        if st.button("⊞  Dashboard",      key="nav_home",   use_container_width=True):
             st.session_state.nav = "home"
             st.session_state.pop("selected_brand", None)
             st.rerun()
-        if st.button("__brands__", key="nav_brands"):
+
+        if st.button("⊟  Brand Overview", key="nav_brands", use_container_width=True):
             st.session_state.nav = "brands"
             st.session_state.pop("selected_brand", None)
             st.rerun()
-        if nav == "brand_detail":
+
+        if nav == "brand_detail" and brands:
+            st.divider()
+            st.caption("Brands")
             for b in brands:
-                if st.button(f"__jump_{b['name']}__", key=f"sidebar_jump_{b['name']}"):
+                if st.button(b["name"], key=f"jump_{b['name']}", use_container_width=True):
                     st.session_state.selected_brand = b["name"]
                     st.rerun()
-        if st.button("__logout__", key="logout_btn"):
+
+        st.divider()
+        if st.button("↪  Logout", key="logout_btn", use_container_width=True):
             from src.auth import delete_session
             delete_session(st.session_state.get("session_token", ""))
             st.query_params.clear()
@@ -581,122 +605,8 @@ def render(user: dict) -> None:
                 del st.session_state[key]
             st.rerun()
 
-    # ── 3. Inject custom sidebar into the page via JS ──
-    import streamlit.components.v1 as _components
-    active_home   = "active" if nav == "home" else ""
-    active_brands = "active" if nav in ("brands", "brand_detail") else ""
-    _components.html(
-        f"""
-        <script>
-        (function() {{
-            var p = window.parent.document;
-
-            // Clean up previous render
-            ["tnt-sb", "tnt-sb-css"].forEach(function(id) {{
-                var el = p.getElementById(id); if (el) el.remove();
-            }});
-
-            // Styles
-            var css = p.createElement("style");
-            css.id = "tnt-sb-css";
-            css.textContent = `
-                #tnt-sb {{
-                    position: fixed;
-                    top: 0; left: 0;
-                    height: 100vh;
-                    width: 64px;
-                    background: #161922;
-                    border-right: 1px solid rgba(255,255,255,0.10);
-                    overflow: hidden;
-                    transition: width 0.22s cubic-bezier(.4,0,.2,1),
-                                box-shadow 0.22s ease;
-                    z-index: 9999;
-                    display: flex;
-                    flex-direction: column;
-                    box-sizing: border-box;
-                }}
-                #tnt-sb.open {{
-                    width: 240px;
-                    box-shadow: 8px 0 36px rgba(0,0,0,0.55);
-                }}
-                .tsb-logo {{
-                    font-size: 0.78rem; font-weight: 800;
-                    color: #fff; letter-spacing: 0.06em;
-                    padding: 22px 0 18px 20px;
-                    white-space: nowrap;
-                    border-bottom: 1px solid rgba(255,255,255,0.07);
-                    flex-shrink: 0;
-                }}
-                .tsb-nav {{
-                    display: flex; align-items: center; gap: 14px;
-                    padding: 11px 0 11px 20px;
-                    margin: 3px 8px;
-                    border-radius: 7px;
-                    color: rgba(255,255,255,0.5);
-                    cursor: pointer;
-                    white-space: nowrap;
-                    font-size: 0.875rem;
-                    transition: background .15s, color .15s;
-                    user-select: none;
-                    flex-shrink: 0;
-                }}
-                .tsb-nav:hover {{ background: rgba(255,255,255,0.07); color: #fff; }}
-                .tsb-nav.active  {{ background: rgba(255,255,255,0.10); color: #fff; font-weight: 600; }}
-                .tsb-icon {{ width: 22px; text-align: center; flex-shrink: 0; font-size: 1rem; }}
-                .tsb-sep  {{ flex: 1; }}
-                .tsb-logout {{ margin: 0 8px 20px; }}
-            `;
-            p.head.appendChild(css);
-
-            // Sidebar HTML
-            var sb = p.createElement("div");
-            sb.id = "tnt-sb";
-            sb.innerHTML = `
-                <div class="tsb-logo">TNT · The New Thing</div>
-                <div class="tsb-nav {active_home}"  data-btn="__home__">
-                    <span class="tsb-icon">⊞</span><span>Dashboard</span>
-                </div>
-                <div class="tsb-nav {active_brands}" data-btn="__brands__">
-                    <span class="tsb-icon">⊟</span><span>Brand Overview</span>
-                </div>
-                <div class="tsb-sep"></div>
-                <div class="tsb-nav tsb-logout" data-btn="__logout__">
-                    <span class="tsb-icon">↪</span><span>Logout</span>
-                </div>
-            `;
-            p.body.appendChild(sb);
-
-            // Click a hidden Streamlit button by its label
-            function clickBtn(label) {{
-                var all = p.querySelectorAll("button");
-                for (var i = 0; i < all.length; i++) {{
-                    if (all[i].innerText.trim() === label) {{ all[i].click(); return; }}
-                }}
-            }}
-
-            // Nav click
-            sb.addEventListener("click", function(e) {{
-                pinned = true;
-                var item = e.target.closest("[data-btn]");
-                if (item) clickBtn(item.getAttribute("data-btn"));
-            }});
-
-            // Hover expand / collapse
-            var pinned = false;
-            sb.addEventListener("mouseenter", function() {{ sb.classList.add("open"); }});
-            sb.addEventListener("mouseleave", function() {{
-                if (!pinned) sb.classList.remove("open");
-            }});
-            p.addEventListener("click", function(e) {{
-                if (!sb.contains(e.target)) {{ pinned = false; sb.classList.remove("open"); }}
-            }});
-        }})();
-        </script>
-        """,
-        height=1,
-    )
-
-    # ── 4. Main content routing ──
+    # ── Main content routing ──
+    nav = st.session_state.nav
     if nav == "home":
         _render_home(user, brands)
     elif nav == "brands":
