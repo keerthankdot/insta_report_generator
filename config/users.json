@@ -1,22 +1,22 @@
 {
   "users": [
     {
-      "email": "am@thenewthing.in",
+      "email": "viren@thenewthing.in",
       "password": "helloworld",
-      "name": "TNT Account Manager",
+      "name": "Viren",
       "role": "am"
     },
     {
-      "email": "keerthan@ascnd.co",
-      "password": "admin2026",
+      "email": "hari@thenewthing.in",
+      "password": "helloworld",
+      "name": "Hari",
+      "role": "am"
+    },
+    {
+      "email": "keerthan@ascnd.build",
+      "password": "helloworld",
       "name": "Keerthan",
       "role": "am"
-    },
-    {
-      "email": "creative@thenewthing.in",
-      "password": "helloworld",
-      "name": "TNT Creative Team",
-      "role": "creative"
     }
   ]
 }

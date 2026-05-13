@@ -272,12 +272,8 @@ if not st.session_state.authenticated:
                     st.error("Invalid email or password.")
     st.stop()
 
-# --- Role-based routing ---
+# --- Dashboard ---
 user = st.session_state.user
 
-if user["role"] == "am":
-    from src.am_dashboard import render
-    render(user)
-else:
-    from src.creative_dashboard import render
-    render(user)
+from src.am_dashboard import render
+render(user)
