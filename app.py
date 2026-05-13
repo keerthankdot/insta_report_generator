@@ -17,12 +17,26 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.auth import verify_user
+from src.auth import create_session, delete_session, get_session, verify_user
 
 st.set_page_config(
     page_title="ReportEngine by Ascnd",
     page_icon="\U0001F4CA",
     layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+# Hide Deploy button and 3-dot toolbar globally
+st.markdown(
+    """
+    <style>
+        #MainMenu { visibility: hidden; }
+        [data-testid="stToolbar"] { display: none !important; }
+        [data-testid="stAppDeployButton"] { display: none !important; }
+        [data-testid="stDecoration"] { display: none !important; }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 # --- Session state defaults ---
@@ -30,6 +44,16 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "user" not in st.session_state:
     st.session_state.user = None
+
+# --- Restore session from URL token (survives refresh) ---
+if not st.session_state.authenticated:
+    tok = st.query_params.get("tok")
+    if tok:
+        user = get_session(tok)
+        if user:
+            st.session_state.authenticated = True
+            st.session_state.user = user
+            st.session_state.session_token = tok
 
 # --- Login gate ---
 if not st.session_state.authenticated:
@@ -188,6 +212,9 @@ if not st.session_state.authenticated:
                 color: rgba(255,255,255,0.30) !important;
             }
 
+            /* Hide "Press Enter to apply" */
+            [data-testid="InputInstructions"] { display: none !important; }
+
             /* Labels — JetBrains Mono */
             [data-testid="stTextInput"] label,
             [data-testid="stTextInput"] label p {
@@ -257,16 +284,25 @@ if not st.session_state.authenticated:
     with col_m:
         st.markdown("<div style='height:30vh'></div>", unsafe_allow_html=True)
         st.markdown("<div class='login-title'>THE NEW THING</div>", unsafe_allow_html=True)
-        email = st.text_input("Email", key="login_email", placeholder="you@domain.com")
-        password = st.text_input("Password", type="password", key="login_password", placeholder="••••••••")
-        if st.button("Sign in", type="primary", use_container_width=True):
+        with st.form("login_form", border=False):
+            email = st.text_input("Email", key="login_email", placeholder="you@domain.com")
+            password = st.text_input("Password", type="password", key="login_password", placeholder="••••••••")
+            submitted = st.form_submit_button("Sign in", type="primary", use_container_width=True)
+        if submitted:
             if not email or not password:
                 st.error("Enter email and password.")
             else:
                 user = verify_user(email, password)
                 if user:
+                    tok = create_session(user)
                     st.session_state.authenticated = True
                     st.session_state.user = user
+                    st.session_state.session_token = tok
+                    st.query_params["tok"] = tok
+                    components.html(
+                        f"<script>localStorage.setItem('tnt_tok','{tok}');</script>",
+                        height=0,
+                    )
                     st.rerun()
                 else:
                     st.error("Invalid email or password.")
