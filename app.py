@@ -87,15 +87,20 @@ if not st.session_state.authenticated:
 
     st.markdown(
         """
+        <link rel="preconnect" href="https://api.fontshare.com" />
+        <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@700,900&display=swap" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" />
         <style>
             #MainMenu, header, footer { visibility: hidden; }
             .block-container { padding: 0 !important; max-width: 100% !important; }
-            body { background: #000 !important; }
+            body { background: #000 !important; font-family: 'Inter', system-ui, sans-serif !important; }
             .stApp, .stAppViewContainer,
             [data-testid="stAppViewBlockContainer"],
             [data-testid="stMain"] { background: transparent !important; }
 
-            /* TNT hero — smaller, lower */
+            /* TNT hero — Satoshi display */
             .tnt-hero {
                 position: fixed;
                 top: 26%;
@@ -107,7 +112,20 @@ if not st.session_state.authenticated:
                 letter-spacing: 6px;
                 white-space: nowrap;
                 z-index: 10;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                font-family: 'Satoshi', sans-serif;
+            }
+
+            /* Match input width exactly to button width */
+            [data-testid="stTextInput"] {
+                width: 100% !important;
+            }
+            [data-testid="stTextInput"] > div {
+                width: 100% !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            [data-baseweb="input"] {
+                width: 100% !important;
             }
 
             /* Strip dark background from every nested div inside the input */
@@ -118,56 +136,97 @@ if not st.session_state.authenticated:
                 background-color: transparent !important;
             }
 
-            /* Liquid glass outer shell */
+            /* Input shell — matches reference exactly */
             [data-baseweb="input"] {
                 background: rgba(255,255,255,0.08) !important;
                 background-color: rgba(255,255,255,0.08) !important;
-                border: 1px solid rgba(255,255,255,0.28) !important;
-                border-radius: 50px !important;
-                backdrop-filter: blur(24px) saturate(160%) !important;
-                -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-                box-shadow: 0 2px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+                border: 1px solid rgba(255,255,255,0.20) !important;
+                border-radius: 9999px !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+                box-shadow:
+                    inset 0 1px 0 rgba(255,255,255,0.12),
+                    inset 0 -1px 0 rgba(0,0,0,0.15) !important;
                 overflow: hidden !important;
+                min-height: 48px !important;
+                height: 48px !important;
             }
 
-            /* Input text */
+            [data-baseweb="input"]:focus-within {
+                border-color: rgba(255,255,255,0.40) !important;
+                background: rgba(255,255,255,0.12) !important;
+            }
+
+            /* Eye button — same gap from right edge as text starts from left (24px) */
+            [data-baseweb="input"] button {
+                margin-right: 16px !important;
+                background: transparent !important;
+                border: none !important;
+                color: rgba(255,255,255,0.35) !important;
+                padding: 0 !important;
+                flex-shrink: 0 !important;
+            }
+            [data-baseweb="input"] button:hover {
+                color: rgba(255,255,255,0.65) !important;
+            }
+            /* Extra padding-right on input so text never slides under the eye */
+            [data-baseweb="input"] input {
+                padding-right: 52px !important;
+            }
+
+            /* Input text + padding — Inter body */
             [data-baseweb="input"] input {
                 background: transparent !important;
                 background-color: transparent !important;
                 color: #fff !important;
                 caret-color: #fff !important;
+                font-size: 1rem !important;
+                font-family: 'Inter', system-ui, sans-serif !important;
+                padding: 12px 24px !important;
             }
             [data-baseweb="input"] input::placeholder {
-                color: rgba(255,255,255,0.32) !important;
+                color: rgba(255,255,255,0.30) !important;
             }
 
-            /* Labels */
+            /* Labels — JetBrains Mono */
             [data-testid="stTextInput"] label,
             [data-testid="stTextInput"] label p {
-                color: rgba(255,255,255,0.6) !important;
-                font-size: 0.78rem !important;
+                color: rgba(255,255,255,0.95) !important;
+                font-size: 0.875rem !important;
                 font-weight: 500 !important;
+                font-family: 'Inter', system-ui, sans-serif !important;
             }
 
-            /* Liquid glass Sign in button */
+            /* Sign in button — gradient + strong inset highlight */
             [data-testid="stBaseButton-primary"],
             [data-testid="stButton"] > button {
-                background: rgba(255,255,255,0.08) !important;
-                background-color: rgba(255,255,255,0.08) !important;
-                border: 1px solid rgba(255,255,255,0.25) !important;
-                border-radius: 50px !important;
-                color: #fff !important;
-                font-size: 0.95rem !important;
+                background: transparent !important;
+                border: 1px solid rgba(255,255,255,0.30) !important;
+                border-radius: 9999px !important;
+                color: rgba(255,255,255,0.95) !important;
+                font-size: 1rem !important;
                 font-weight: 500 !important;
-                letter-spacing: 0.03em !important;
-                backdrop-filter: blur(24px) saturate(160%) !important;
-                -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-                box-shadow: 0 2px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+                font-family: 'Inter', system-ui, sans-serif !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+                box-shadow:
+                    0 8px 32px rgba(0,0,0,0.45),
+                    inset 0 1.5px 0 rgba(255,255,255,0.45),
+                    inset 0 -1px 0 rgba(0,0,0,0.20) !important;
+                transition: all 0.2s !important;
+                padding: 12px 20px !important;
+                min-height: 48px !important;
+                height: 48px !important;
             }
             [data-testid="stBaseButton-primary"]:hover,
             [data-testid="stButton"] > button:hover {
-                background: rgba(255,255,255,0.14) !important;
-                background-color: rgba(255,255,255,0.14) !important;
+                transform: translateY(-1px) !important;
+                border-color: rgba(255,255,255,0.40) !important;
+                background: rgba(255,255,255,0.05) !important;
+                box-shadow:
+                    0 12px 40px rgba(0,0,0,0.50),
+                    inset 0 1.5px 0 rgba(255,255,255,0.50),
+                    inset 0 -1px 0 rgba(0,0,0,0.20) !important;
             }
 
             /* Error */
