@@ -1,7 +1,7 @@
 """Account Manager dashboard for ReportEngine.
 
-Full AM view: upload CSVs, period-over-period deltas, goals vs actuals,
-qualitative AM notes form, weekly/monthly report generation.
+Landing: brand-by-brand overview grid.
+Detail: click a brand to see metrics, upload CSVs, generate reports.
 """
 
 import json
@@ -29,347 +29,348 @@ def _load_brands() -> list[dict]:
         return []
 
 
+def _brand_data(brand_name: str) -> dict:
+    """Get cached session data for a brand."""
+    return st.session_state.get("brand_data", {}).get(brand_name, {})
+
+
+def _save_brand_data(brand_name: str, ig_df=None, x_df=None) -> None:
+    if "brand_data" not in st.session_state:
+        st.session_state.brand_data = {}
+    existing = st.session_state.brand_data.get(brand_name, {})
+    if ig_df is not None:
+        existing["ig_df"] = ig_df
+    if x_df is not None:
+        existing["x_df"] = x_df
+    st.session_state.brand_data[brand_name] = existing
+
+
 def _delta_label(delta: Optional[dict]) -> tuple[Optional[float], Optional[str]]:
-    """Return (delta_value, delta_label) for st.metric."""
     if delta is None or delta.get("delta_pct") is None:
         return None, None
     pct = delta["delta_pct"]
-    label = f"{'+' if pct > 0 else ''}{pct}% vs prior period"
-    return pct, label
+    return pct, f"{'+' if pct > 0 else ''}{pct}% vs prior"
 
 
-def _render_goals_section(goals_actuals: dict) -> None:
-    if not goals_actuals:
-        st.caption("No goals configured for this brand. Add goals in config/brands.json.")
+# ─── Overview ────────────────────────────────────────────────────────────────
+
+def _render_overview(user: dict, brands: list[dict]) -> None:
+    st.markdown(
+        f"<h1 style='margin-bottom:4px'>Brand Overview</h1>"
+        f"<p style='color:rgba(255,255,255,0.5);margin-bottom:32px'>"
+        f"Logged in as {user['name']}. Select a brand to view or upload data.</p>",
+        unsafe_allow_html=True,
+    )
+
+    if not brands:
+        st.info("No brands configured. Add brands to config/brands.json.")
         return
 
-    cols = st.columns(len(goals_actuals))
-    for i, (label, data) in enumerate(goals_actuals.items()):
-        with cols[i]:
-            pct = data["pct"]
-            color = "normal" if data["met"] else "inverse"
-            delta_label = f"{pct}% of goal ({data['goal']:,})"
-            val = data["actual"]
-            display_val = f"{val:,.0f}" if isinstance(val, (int, float)) and val >= 10 else f"{val}%"
-            st.metric(label=label, value=display_val, delta=delta_label, delta_color=color)
+    cols_per_row = 3
+    rows = [brands[i:i+cols_per_row] for i in range(0, len(brands), cols_per_row)]
+
+    for row in rows:
+        cols = st.columns(cols_per_row)
+        for col, brand in zip(cols, row):
+            with col:
+                _render_brand_card(brand)
 
 
-def _render_am_notes_form() -> dict:
-    """Render the qualitative AM notes form. Returns the form values."""
-    st.subheader("AM Notes")
-    st.caption("These feed directly into the generated report.")
+def _render_brand_card(brand: dict) -> None:
+    name = brand["name"]
+    color = brand.get("color", "#1E3C73")
+    data = _brand_data(name)
+    ig_df = data.get("ig_df")
+    x_df = data.get("x_df")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        sentiment = st.selectbox(
-            "Client Sentiment",
-            options=["Positive", "Neutral", "Negative", "At Risk"],
-            key="am_sentiment",
-        )
-        wins = st.text_area(
-            "Strategic Wins This Period",
-            placeholder="e.g. Reel hit 50k reach, client approved new content pillars",
-            key="am_wins",
-            height=100,
-        )
-        risks = st.text_area(
-            "Upcoming Risks",
-            placeholder="e.g. Client hasn't approved next month's content yet",
-            key="am_risks",
-            height=100,
-        )
-    with col2:
-        relationship_note = st.text_area(
-            "Relationship Note",
-            placeholder="e.g. Viren is very engaged this month, responded within 1 hour",
-            key="am_relationship",
-            height=80,
-        )
-        losses = st.text_area(
-            "Misses / Focus Areas",
-            placeholder="e.g. Story reach dropped 20%, need to revisit cadence",
-            key="am_losses",
-            height=100,
-        )
-        client_feedback = st.text_area(
-            "Client Verbatim Feedback",
-            placeholder="Paste any direct quotes from the client call or email",
-            key="am_feedback",
-            height=80,
-        )
+    has_data = ig_df is not None or x_df is not None
 
-    return {
-        "sentiment": sentiment,
-        "wins": wins,
-        "losses": losses,
-        "risks": risks,
-        "relationship_note": relationship_note,
-        "client_feedback": client_feedback,
-    }
+    # Build metric lines
+    ig_line = ""
+    x_line = ""
+    if ig_df is not None and len(ig_df) > 0:
+        reach = f"{int(ig_df['reach'].sum()):,}"
+        eng = f"{round(ig_df['engagement_rate'].mean(), 2)}%"
+        ig_line = f"<div style='font-size:0.78rem;color:rgba(255,255,255,0.6);margin-top:6px'>IG &nbsp; Reach {reach} &nbsp;·&nbsp; Eng {eng}</div>"
+    if x_df is not None and len(x_df) > 0:
+        imp = f"{int(x_df['impressions'].sum()):,}"
+        eng = f"{round(x_df['engagement_rate'].mean(), 2)}%"
+        x_line = f"<div style='font-size:0.78rem;color:rgba(255,255,255,0.6);margin-top:2px'>X &nbsp;&nbsp;&nbsp; Imp {imp} &nbsp;·&nbsp; Eng {eng}</div>"
 
+    status_dot = f"<span style='width:8px;height:8px;border-radius:50%;background:{'#27AE60' if has_data else '#555'};display:inline-block;margin-right:6px'></span>"
+    status_label = "Data loaded" if has_data else "No data"
 
-def render(user: dict) -> None:
-    """Render the Account Manager dashboard.
-
-    Args:
-        user: Authenticated user dict {email, name, role}.
-    """
-    brands = _load_brands()
-    brand_names = [b["name"] for b in brands] if brands else []
-
-    # --- Sidebar ---
-    with st.sidebar:
-        st.markdown(f"**{user['name']}**")
-        st.caption(user["email"])
-        st.divider()
-
-        st.subheader("Report Settings")
-
-        if brand_names:
-            selected_brand_name = st.selectbox("Brand", brand_names, key="am_brand")
-            brand_config = next((b for b in brands if b["name"] == selected_brand_name), {})
-        else:
-            selected_brand_name = st.text_input("Brand Name", placeholder="e.g. Tinder", key="am_brand_text")
-            brand_config = {}
-
-        report_type = st.radio(
-            "Report Type",
-            options=["Weekly", "Monthly"],
-            horizontal=True,
-            key="am_report_type",
-        ).lower()
-
-        st.subheader("Platforms")
-        use_ig = st.checkbox("Instagram", value=True, key="am_use_ig")
-        use_x = st.checkbox("X (Twitter)", value=False, key="am_use_x")
-
-        st.divider()
-        if st.button("Logout", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.rerun()
-        st.caption("Powered by Ascnd")
-
-    brand_name = selected_brand_name or ""
-    goals = brand_config.get("goals", {})
-
-    # --- Header ---
-    period_label = "Weekly" if report_type == "weekly" else "Monthly"
-    st.title(f"AM Dashboard — {brand_name or 'Select a Brand'}")
-    st.caption(f"{period_label} report view. Upload CSVs to begin.")
-
-    # --- Section 1: Upload ---
-    st.header("1. Upload Data")
-    ig_df: Optional[pd.DataFrame] = None
-    x_df: Optional[pd.DataFrame] = None
-
-    upload_col1, upload_col2 = st.columns(2)
-
-    with upload_col1:
-        if use_ig:
-            ig_file = st.file_uploader(
-                "Instagram CSV (Meta Business Suite export)",
-                type=["csv"],
-                key="am_ig_file",
-            )
-            if ig_file:
-                try:
-                    with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
-                        tmp.write(ig_file.getvalue())
-                        tmp_path = tmp.name
-                    ig_df = ig_processor.process(tmp_path, brand_name or "Brand")
-                    os.unlink(tmp_path)
-                    dates = pd.to_datetime(ig_df["date"])
-                    st.success(
-                        f"Instagram: {len(ig_df)} posts "
-                        f"({dates.min().strftime('%b %-d')} - {dates.max().strftime('%b %-d, %Y')})"
-                    )
-                except Exception as e:
-                    st.error(f"Instagram CSV error: {e}")
-                    ig_df = None
-
-    with upload_col2:
-        if use_x:
-            x_file = st.file_uploader(
-                "X CSV (X Analytics export)",
-                type=["csv"],
-                key="am_x_file",
-            )
-            if x_file:
-                try:
-                    with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
-                        tmp.write(x_file.getvalue())
-                        tmp_path = tmp.name
-                    x_df = x_processor.process(tmp_path, brand_name or "Brand")
-                    os.unlink(tmp_path)
-                    dates = pd.to_datetime(x_df["date"])
-                    st.success(
-                        f"X: {len(x_df)} tweets "
-                        f"({dates.min().strftime('%b %-d')} - {dates.max().strftime('%b %-d, %Y')})"
-                    )
-                except Exception as e:
-                    st.error(f"X CSV error: {e}")
-                    x_df = None
-
-    if ig_df is None and x_df is None:
-        st.info("Upload at least one CSV to see metrics.")
-        return
-
-    # --- Section 2: Performance Overview ---
-    st.divider()
-    st.header("2. Performance Overview")
-
-    # Split into current vs prior period for delta calc
-    ig_current, ig_prior = split_by_period(ig_df, report_type) if ig_df is not None else (None, None)
-    x_current, x_prior = split_by_period(x_df, report_type) if x_df is not None else (None, None)
-
-    deltas = compute_deltas(ig_current, ig_prior, x_current, x_prior)
-
-    # Use full data for goals vs actuals and health score
-    goals_actuals = compute_goals_actuals(ig_df, x_df, goals, report_type)
-
-    # AM notes must be collected before health score (sentinel values used if form not filled yet)
-    am_notes_pre = {
-        "sentiment": st.session_state.get("am_sentiment", "Neutral"),
-        "wins": st.session_state.get("am_wins", ""),
-        "losses": st.session_state.get("am_losses", ""),
-        "risks": st.session_state.get("am_risks", ""),
-        "relationship_note": st.session_state.get("am_relationship", ""),
-        "client_feedback": st.session_state.get("am_feedback", ""),
-    }
-    health = compute_health_score(ig_df, x_df, goals, am_notes_pre, report_type)
-
-    # Health score banner
-    band_color_map = {
-        "Thriving": "#27AE60",
-        "Healthy": "#3498DB",
-        "At Risk": "#E67E22",
-        "Critical": "#E74C3C",
-    }
-    hc = band_color_map.get(health["band"], "#95A5A6")
     st.markdown(
         f"""
         <div style="
-            background:{hc};
+            border:1px solid rgba(255,255,255,0.10);
+            border-top: 3px solid {color};
             border-radius:12px;
-            padding:14px 24px;
-            display:flex;
-            align-items:center;
-            gap:18px;
-            margin-bottom:8px;
+            padding:20px;
+            background:rgba(255,255,255,0.04);
+            margin-bottom:4px;
+            min-height:130px;
         ">
-            <span style="font-size:2.4rem;font-weight:900;color:#fff;line-height:1">
-                {health['score']}
-            </span>
-            <div>
-                <div style="font-size:1.1rem;font-weight:700;color:#fff">
-                    {health['band']}
-                </div>
-                <div style="font-size:0.78rem;color:rgba(255,255,255,0.8)">
-                    Campaign {health['breakdown']['campaign']} &nbsp;|&nbsp;
-                    Delivery {health['breakdown']['delivery']} &nbsp;|&nbsp;
-                    Sentiment {health['breakdown']['sentiment']}
-                </div>
+            <div style="font-size:1.1rem;font-weight:700;color:#fff">{name}</div>
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:4px;margin-bottom:8px">
+                {status_dot}{status_label}
             </div>
-            <span style="margin-left:auto;font-size:0.8rem;color:rgba(255,255,255,0.7)">
-                Client Health Score
-            </span>
+            {ig_line}{x_line}
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Scorecard row
-    scorecard_cols = []
-    scorecard_data = []
+    if st.button("Open", key=f"open_{name}", use_container_width=True):
+        st.session_state.selected_brand = name
+        st.rerun()
 
+
+# ─── Brand detail ─────────────────────────────────────────────────────────────
+
+def _render_am_notes_form(brand_name: str) -> dict:
+    col1, col2 = st.columns(2)
+    with col1:
+        sentiment = st.selectbox(
+            "Client Sentiment",
+            options=["Positive", "Neutral", "Negative", "At Risk"],
+            key=f"{brand_name}_sentiment",
+        )
+        wins = st.text_area(
+            "Strategic Wins",
+            placeholder="e.g. Reel hit 50k reach",
+            key=f"{brand_name}_wins",
+            height=90,
+        )
+        risks = st.text_area(
+            "Upcoming Risks",
+            placeholder="e.g. Approval delayed",
+            key=f"{brand_name}_risks",
+            height=90,
+        )
+    with col2:
+        relationship_note = st.text_area(
+            "Relationship Note",
+            placeholder="e.g. Client very responsive this month",
+            key=f"{brand_name}_relationship",
+            height=75,
+        )
+        losses = st.text_area(
+            "Misses / Focus Areas",
+            placeholder="e.g. Story reach down 20%",
+            key=f"{brand_name}_losses",
+            height=90,
+        )
+        client_feedback = st.text_area(
+            "Client Verbatim",
+            placeholder="Direct quotes from call or email",
+            key=f"{brand_name}_feedback",
+            height=75,
+        )
+    return {
+        "sentiment": sentiment, "wins": wins, "losses": losses,
+        "risks": risks, "relationship_note": relationship_note,
+        "client_feedback": client_feedback,
+    }
+
+
+def _render_brand_detail(user: dict, brand: dict) -> None:
+    brand_name = brand["name"]
+    color = brand.get("color", "#1E3C73")
+    goals = brand.get("goals", {})
+
+    # Back button
+    if st.button("← Back to all brands"):
+        st.session_state.selected_brand = None
+        st.rerun()
+
+    st.markdown(
+        f"<h1 style='margin-top:8px;border-left:4px solid {color};padding-left:14px'>{brand_name}</h1>",
+        unsafe_allow_html=True,
+    )
+
+    # Report type
+    report_type = st.radio(
+        "Report period",
+        options=["Weekly", "Monthly"],
+        horizontal=True,
+        key=f"{brand_name}_report_type",
+    ).lower()
+    period_label = report_type.capitalize()
+
+    st.divider()
+
+    # ── Upload ──────────────────────────────────────────────────────────────
+    st.subheader("Upload Data")
+    cached = _brand_data(brand_name)
+    ig_df: Optional[pd.DataFrame] = cached.get("ig_df")
+    x_df: Optional[pd.DataFrame] = cached.get("x_df")
+
+    up_col1, up_col2 = st.columns(2)
+    with up_col1:
+        ig_file = st.file_uploader(
+            "Instagram CSV (Meta Business Suite)",
+            type=["csv"],
+            key=f"{brand_name}_ig_file",
+        )
+        if ig_file:
+            try:
+                with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
+                    tmp.write(ig_file.getvalue())
+                    tmp_path = tmp.name
+                ig_df = ig_processor.process(tmp_path, brand_name)
+                os.unlink(tmp_path)
+                _save_brand_data(brand_name, ig_df=ig_df)
+                dates = pd.to_datetime(ig_df["date"])
+                st.success(
+                    f"{len(ig_df)} posts · "
+                    f"{dates.min().strftime('%b %-d')} – {dates.max().strftime('%b %-d, %Y')}"
+                )
+            except Exception as e:
+                st.error(f"Instagram error: {e}")
+
+    with up_col2:
+        x_file = st.file_uploader(
+            "X CSV (X Analytics)",
+            type=["csv"],
+            key=f"{brand_name}_x_file",
+        )
+        if x_file:
+            try:
+                with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
+                    tmp.write(x_file.getvalue())
+                    tmp_path = tmp.name
+                x_df = x_processor.process(tmp_path, brand_name)
+                os.unlink(tmp_path)
+                _save_brand_data(brand_name, x_df=x_df)
+                dates = pd.to_datetime(x_df["date"])
+                st.success(
+                    f"{len(x_df)} tweets · "
+                    f"{dates.min().strftime('%b %-d')} – {dates.max().strftime('%b %-d, %Y')}"
+                )
+            except Exception as e:
+                st.error(f"X error: {e}")
+
+    if ig_df is None and x_df is None:
+        st.info("Upload at least one CSV to see metrics.")
+        return
+
+    st.divider()
+
+    # ── Performance overview ─────────────────────────────────────────────────
+    st.subheader("Performance Overview")
+
+    ig_current, ig_prior = split_by_period(ig_df, report_type) if ig_df is not None else (None, None)
+    x_current, x_prior = split_by_period(x_df, report_type) if x_df is not None else (None, None)
+    deltas = compute_deltas(ig_current, ig_prior, x_current, x_prior)
+    goals_actuals = compute_goals_actuals(ig_df, x_df, goals, report_type)
+
+    am_notes_pre = {
+        "sentiment": st.session_state.get(f"{brand_name}_sentiment", "Neutral"),
+    }
+    health = compute_health_score(ig_df, x_df, goals, am_notes_pre, report_type)
+
+    # Health score banner
+    band_colors = {"Thriving": "#27AE60", "Healthy": "#3498DB", "At Risk": "#E67E22", "Critical": "#E74C3C"}
+    hc = band_colors.get(health["band"], "#555")
+    st.markdown(
+        f"""<div style="background:{hc};border-radius:10px;padding:12px 20px;
+            display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <span style="font-size:2rem;font-weight:900;color:#fff">{health['score']}</span>
+            <div>
+                <div style="font-weight:700;color:#fff">{health['band']}</div>
+                <div style="font-size:0.75rem;color:rgba(255,255,255,0.8)">
+                    Campaign {health['breakdown']['campaign']} · Delivery {health['breakdown']['delivery']} · Sentiment {health['breakdown']['sentiment']}
+                </div>
+            </div>
+            <span style="margin-left:auto;font-size:0.78rem;color:rgba(255,255,255,0.7)">Client Health Score</span>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+
+    # Scorecards
+    scorecard_data = []
     if ig_df is not None and len(ig_df) > 0:
-        scorecard_data.extend([
+        scorecard_data += [
             ("IG Posts", str(len(ig_df)), deltas.get("ig_posts")),
-            ("IG Total Reach", f"{int(ig_df['reach'].sum()):,}", deltas.get("ig_reach")),
-            ("IG Avg Eng. Rate", f"{round(ig_df['engagement_rate'].mean(), 2)}%", deltas.get("ig_engagement_rate")),
-        ])
+            ("IG Reach", f"{int(ig_df['reach'].sum()):,}", deltas.get("ig_reach")),
+            ("IG Eng. Rate", f"{round(ig_df['engagement_rate'].mean(), 2)}%", deltas.get("ig_engagement_rate")),
+        ]
     if x_df is not None and len(x_df) > 0:
-        scorecard_data.extend([
+        scorecard_data += [
             ("X Tweets", str(len(x_df)), deltas.get("x_posts")),
             ("X Impressions", f"{int(x_df['impressions'].sum()):,}", deltas.get("x_impressions")),
-            ("X Avg Eng. Rate", f"{round(x_df['engagement_rate'].mean(), 2)}%", deltas.get("x_engagement_rate")),
-        ])
+            ("X Eng. Rate", f"{round(x_df['engagement_rate'].mean(), 2)}%", deltas.get("x_engagement_rate")),
+        ]
 
-    num_cols = len(scorecard_data)
-    if num_cols > 0:
-        cols = st.columns(num_cols)
+    if scorecard_data:
+        cols = st.columns(len(scorecard_data))
         for i, (label, value, delta) in enumerate(scorecard_data):
             with cols[i]:
-                _, delta_label = _delta_label(delta)
-                delta_pct = delta["delta_pct"] if delta else None
-                st.metric(
-                    label=label,
-                    value=value,
-                    delta=delta_label,
-                    delta_color="normal" if delta_pct and delta_pct >= 0 else "inverse",
-                )
+                pct, dlabel = _delta_label(delta)
+                st.metric(label, value, dlabel,
+                          delta_color="normal" if pct and pct >= 0 else "inverse")
 
-    # Goals vs Actuals
+    # Goals vs actuals
     if goals_actuals:
         st.subheader(f"Goals vs Actuals ({period_label})")
-        _render_goals_section(goals_actuals)
+        gcols = st.columns(len(goals_actuals))
+        for i, (label, data) in enumerate(goals_actuals.items()):
+            with gcols[i]:
+                pct = data["pct"]
+                val = data["actual"]
+                display_val = f"{val:,.0f}" if isinstance(val, (int, float)) and val >= 10 else f"{val}%"
+                st.metric(label, display_val, f"{pct}% of goal ({data['goal']:,})",
+                          delta_color="normal" if data["met"] else "inverse")
 
-    # Top content type breakdown
+    # IG content breakdown
     if ig_df is not None and len(ig_df) > 0:
         st.subheader("Instagram: Content Type Breakdown")
         breakdown = (
             ig_df.groupby("content_type")
             .agg(posts=("post_id", "count"), avg_reach=("reach", "mean"), avg_eng=("engagement_rate", "mean"))
-            .round(2)
-            .sort_values("avg_eng", ascending=False)
-            .reset_index()
+            .round(2).sort_values("avg_eng", ascending=False).reset_index()
         )
-        breakdown.columns = ["Content Type", "Posts", "Avg Reach", "Avg Eng. Rate (%)"]
+        breakdown.columns = ["Type", "Posts", "Avg Reach", "Avg Eng. Rate (%)"]
         breakdown["Avg Reach"] = breakdown["Avg Reach"].apply(lambda x: f"{int(x):,}")
         st.dataframe(breakdown, use_container_width=True, hide_index=True)
 
-    # --- Section 3: AM Notes ---
     st.divider()
-    st.header("3. Qualitative Inputs")
-    am_notes = _render_am_notes_form()
 
-    # --- Section 4: Generate Report ---
+    # ── AM Notes ────────────────────────────────────────────────────────────
+    st.subheader("AM Notes")
+    st.caption("These feed directly into the generated report.")
+    am_notes = _render_am_notes_form(brand_name)
+
     st.divider()
-    st.header("4. Generate Report")
 
+    # ── Generate ─────────────────────────────────────────────────────────────
+    st.subheader("Generate Report")
     gen_col1, gen_col2 = st.columns(2)
 
     with gen_col1:
-        if st.button(f"Generate {period_label} PPTX", type="primary", use_container_width=True):
-            if not brand_name:
-                st.warning("Select or enter a brand name.")
-            else:
-                try:
-                    with tempfile.NamedTemporaryFile(suffix=".pptx", delete=False) as tmp:
-                        tmp_path = tmp.name
-                    generate_report(
-                        ig_df, x_df, brand_name, tmp_path,
-                        report_type=report_type,
-                        am_notes=am_notes,
-                        deltas=deltas,
-                        goals_actuals=goals_actuals,
-                        health=health,
-                    )
-                    with open(tmp_path, "rb") as f:
-                        pptx_bytes = f.read()
-                    os.unlink(tmp_path)
-                    st.success(f"{period_label} report ready for {brand_name}.")
-                    st.download_button(
-                        label=f"Download {period_label} PPTX",
-                        data=pptx_bytes,
-                        file_name=f"{brand_name.lower().replace(' ', '_')}_{report_type}_report.pptx",
-                        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                        type="primary",
-                        key="am_download_pptx",
-                    )
-                except Exception as e:
-                    st.error(f"Report generation error: {e}")
+        if st.button(f"Generate {period_label} PPTX", type="primary", use_container_width=True,
+                     key=f"{brand_name}_gen_pptx"):
+            try:
+                with tempfile.NamedTemporaryFile(suffix=".pptx", delete=False) as tmp:
+                    tmp_path = tmp.name
+                generate_report(
+                    ig_df, x_df, brand_name, tmp_path,
+                    report_type=report_type, am_notes=am_notes,
+                    deltas=deltas, goals_actuals=goals_actuals,
+                )
+                with open(tmp_path, "rb") as f:
+                    pptx_bytes = f.read()
+                os.unlink(tmp_path)
+                st.success(f"{period_label} report ready.")
+                st.download_button(
+                    f"Download {period_label} PPTX", pptx_bytes,
+                    file_name=f"{brand_name.lower().replace(' ', '_')}_{report_type}_report.pptx",
+                    mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    type="primary", key=f"{brand_name}_dl_pptx",
+                )
+            except Exception as e:
+                st.error(f"Report error: {e}")
 
     with gen_col2:
         has_creds = False
@@ -382,19 +383,13 @@ def render(user: dict) -> None:
         except Exception:
             pass
 
-        if st.button(
-            "Write to Google Sheets",
-            use_container_width=True,
-            disabled=not has_creds,
-            help="Configure credentials in .env" if not has_creds else "Write data to Google Sheets",
-        ):
+        if st.button("Write to Google Sheets", use_container_width=True,
+                     disabled=not has_creds, key=f"{brand_name}_sheets",
+                     help="Configure credentials in .env" if not has_creds else None):
             try:
                 from dotenv import load_dotenv
                 load_dotenv()
-                writer = SheetsWriter(
-                    os.getenv("GOOGLE_CREDENTIALS_PATH"),
-                    os.getenv("SHEET_ID"),
-                )
+                writer = SheetsWriter(os.getenv("GOOGLE_CREDENTIALS_PATH"), os.getenv("SHEET_ID"))
                 if ig_df is not None:
                     writer.write(ig_df, "IG Posts", mode="overwrite")
                 if x_df is not None:
@@ -407,6 +402,43 @@ def render(user: dict) -> None:
                 if all_dates:
                     sorted_dates = sorted(all_dates)
                     writer.update_metadata([brand_name], (sorted_dates[0], sorted_dates[-1]))
-                st.success("Data written to Google Sheets.")
+                st.success("Written to Google Sheets.")
             except Exception as e:
-                st.error(f"Sheets write error: {e}")
+                st.error(f"Sheets error: {e}")
+
+
+# ─── Router ───────────────────────────────────────────────────────────────────
+
+def render(user: dict) -> None:
+    """Render the AM dashboard — overview or brand detail based on session state."""
+    brands = _load_brands()
+
+    with st.sidebar:
+        st.markdown(f"**{user['name']}**")
+        st.caption(user["email"])
+        st.divider()
+        # Brand quick-jump
+        if brands and st.session_state.get("selected_brand"):
+            st.caption("Switch brand")
+            for b in brands:
+                if st.button(b["name"], key=f"sidebar_jump_{b['name']}", use_container_width=True):
+                    st.session_state.selected_brand = b["name"]
+                    st.rerun()
+            st.divider()
+        if st.button("Logout", use_container_width=True):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
+        st.caption("Powered by Ascnd")
+
+    selected = st.session_state.get("selected_brand")
+
+    if selected:
+        brand_config = next((b for b in brands if b["name"] == selected), {})
+        if brand_config:
+            _render_brand_detail(user, brand_config)
+        else:
+            st.session_state.selected_brand = None
+            st.rerun()
+    else:
+        _render_overview(user, brands)

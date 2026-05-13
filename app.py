@@ -100,19 +100,19 @@ if not st.session_state.authenticated:
             [data-testid="stAppViewBlockContainer"],
             [data-testid="stMain"] { background: transparent !important; }
 
-            /* TNT hero — Satoshi display */
-            .tnt-hero {
-                position: fixed;
-                top: 26%;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 4.5rem;
+            /* Title — single line, spans full column width edge to edge */
+            .login-title {
+                width: 100%;
+                font-size: clamp(1rem, 4.2vw, 2.75rem);
                 font-weight: 900;
                 color: #fff;
-                letter-spacing: 6px;
-                white-space: nowrap;
-                z-index: 10;
                 font-family: 'Satoshi', sans-serif;
+                white-space: nowrap;
+                text-align: justify;
+                text-align-last: justify;
+                text-justify: inter-word;
+                margin-bottom: 20px;
+                line-height: 1;
             }
 
             /* Match input width exactly to button width */
@@ -197,43 +197,47 @@ if not st.session_state.authenticated:
                 font-family: 'Inter', system-ui, sans-serif !important;
             }
 
-            /* Sign in button — transparent liquid glass with bevel */
-            [data-testid="stBaseButton-primary"],
-            [data-testid="stButton"] > button,
+            /* Strip child bg so gradient on outer element shows through */
             [data-testid="stBaseButton-primary"] *,
             [data-testid="stButton"] > button * {
                 background: transparent !important;
                 background-color: transparent !important;
             }
+
+            /* Sign in button — exact frosted glass pill */
             [data-testid="stBaseButton-primary"],
             [data-testid="stButton"] > button {
-                border: 1px solid rgba(255,255,255,0.22) !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 12px 20px !important;
                 border-radius: 9999px !important;
-                color: rgba(255,255,255,0.95) !important;
                 font-size: 1rem !important;
                 font-weight: 500 !important;
+                color: rgba(255,255,255,0.95) !important;
                 font-family: 'Inter', system-ui, sans-serif !important;
-                backdrop-filter: blur(24px) saturate(180%) !important;
-                -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+                background: linear-gradient(to bottom, rgba(255,255,255,0.22), rgba(255,255,255,0.06)) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+                border: 1px solid rgba(255,255,255,0.30) !important;
                 box-shadow:
-                    0 0 18px rgba(255,255,255,0.06),
-                    0 8px 32px rgba(0,0,0,0.35),
-                    inset 0 1.5px 0 rgba(255,255,255,0.55),
-                    inset 0 -1.5px 0 rgba(0,0,0,0.30) !important;
-                transition: all 0.2s !important;
-                padding: 12px 20px !important;
+                    0 8px 32px rgba(0,0,0,0.45),
+                    inset 0 1.5px 0 rgba(255,255,255,0.45),
+                    inset 0 -1px 0 rgba(0,0,0,0.20) !important;
                 min-height: 48px !important;
                 height: 48px !important;
+                transition: all 0.2s !important;
             }
             [data-testid="stBaseButton-primary"]:hover,
             [data-testid="stButton"] > button:hover {
                 transform: translateY(-1px) !important;
-                border-color: rgba(255,255,255,0.35) !important;
-                box-shadow:
-                    0 0 28px rgba(255,255,255,0.10),
-                    0 12px 40px rgba(0,0,0,0.40),
-                    inset 0 1.5px 0 rgba(255,255,255,0.65),
-                    inset 0 -1.5px 0 rgba(0,0,0,0.30) !important;
+                background: linear-gradient(to bottom, rgba(255,255,255,0.28), rgba(255,255,255,0.10)) !important;
+                border-color: rgba(255,255,255,0.40) !important;
+            }
+            [data-testid="stBaseButton-primary"]:disabled,
+            [data-testid="stButton"] > button:disabled {
+                opacity: 0.50 !important;
+                cursor: wait !important;
             }
 
             /* Error */
@@ -244,7 +248,6 @@ if not st.session_state.authenticated:
                 backdrop-filter: blur(10px) !important;
             }
         </style>
-        <div class="tnt-hero">TNT</div>
         """,
         unsafe_allow_html=True,
     )
@@ -252,7 +255,8 @@ if not st.session_state.authenticated:
     # Narrow centre column so inputs match reference width (~360px)
     col_l, col_m, col_r = st.columns([3, 2, 3])
     with col_m:
-        st.markdown("<div style='height:42vh'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:30vh'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='login-title'>THE NEW THING</div>", unsafe_allow_html=True)
         email = st.text_input("Email", key="login_email", placeholder="you@domain.com")
         password = st.text_input("Password", type="password", key="login_password", placeholder="••••••••")
         if st.button("Sign in", type="primary", use_container_width=True):
