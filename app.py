@@ -197,22 +197,29 @@ if not st.session_state.authenticated:
                 font-family: 'Inter', system-ui, sans-serif !important;
             }
 
-            /* Sign in button — gradient + strong inset highlight */
+            /* Sign in button — transparent liquid glass with bevel */
+            [data-testid="stBaseButton-primary"],
+            [data-testid="stButton"] > button,
+            [data-testid="stBaseButton-primary"] *,
+            [data-testid="stButton"] > button * {
+                background: transparent !important;
+                background-color: transparent !important;
+            }
             [data-testid="stBaseButton-primary"],
             [data-testid="stButton"] > button {
-                background: transparent !important;
-                border: 1px solid rgba(255,255,255,0.30) !important;
+                border: 1px solid rgba(255,255,255,0.22) !important;
                 border-radius: 9999px !important;
                 color: rgba(255,255,255,0.95) !important;
                 font-size: 1rem !important;
                 font-weight: 500 !important;
                 font-family: 'Inter', system-ui, sans-serif !important;
-                backdrop-filter: blur(20px) !important;
-                -webkit-backdrop-filter: blur(20px) !important;
+                backdrop-filter: blur(24px) saturate(180%) !important;
+                -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
                 box-shadow:
-                    0 8px 32px rgba(0,0,0,0.45),
-                    inset 0 1.5px 0 rgba(255,255,255,0.45),
-                    inset 0 -1px 0 rgba(0,0,0,0.20) !important;
+                    0 0 18px rgba(255,255,255,0.06),
+                    0 8px 32px rgba(0,0,0,0.35),
+                    inset 0 1.5px 0 rgba(255,255,255,0.55),
+                    inset 0 -1.5px 0 rgba(0,0,0,0.30) !important;
                 transition: all 0.2s !important;
                 padding: 12px 20px !important;
                 min-height: 48px !important;
@@ -221,12 +228,12 @@ if not st.session_state.authenticated:
             [data-testid="stBaseButton-primary"]:hover,
             [data-testid="stButton"] > button:hover {
                 transform: translateY(-1px) !important;
-                border-color: rgba(255,255,255,0.40) !important;
-                background: rgba(255,255,255,0.05) !important;
+                border-color: rgba(255,255,255,0.35) !important;
                 box-shadow:
-                    0 12px 40px rgba(0,0,0,0.50),
-                    inset 0 1.5px 0 rgba(255,255,255,0.50),
-                    inset 0 -1px 0 rgba(0,0,0,0.20) !important;
+                    0 0 28px rgba(255,255,255,0.10),
+                    0 12px 40px rgba(0,0,0,0.40),
+                    inset 0 1.5px 0 rgba(255,255,255,0.65),
+                    inset 0 -1.5px 0 rgba(0,0,0,0.30) !important;
             }
 
             /* Error */
