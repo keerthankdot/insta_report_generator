@@ -1,129 +1,122 @@
-import { Link } from 'react-router-dom'
-import { Users, BarChart3, Sparkles, ArrowRight } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 import { Card, StatCard } from '../components/ui/Card'
-import { getCurrentUser, ROLE_LABELS, type Role } from '../lib/auth'
-import { BRANDS, PEOPLE, CREATIVE_ENTRIES } from '../lib/data'
+import { PostCard } from '../components/ui/PostCard'
 
-interface QuickLink {
-  label: string
-  to: string
-  description: string
-  icon: typeof Users
-}
+import { getCurrentUser } from '../lib/auth'
+import {
+  BRAND_METRICS,
+  PEOPLE,
+  CREATOR_FORTNIGHT,
+  FORTNIGHT_PERIOD,
+  FORTNIGHT_BRAND,
+  TOP_POSTS_FORTNIGHT,
+  formatNumber,
+  getBrandsForUser,
+} from '../lib/data'
 
-const QUICK_LINKS: Record<string, QuickLink> = {
-  founder: {
-    label: 'Founder OS',
-    to: '/founder',
-    description: 'Track team trajectory, run better 1:1s',
-    icon: Users,
-  },
-  am: {
-    label: 'AM Tracker',
-    to: '/am',
-    description: 'Brand health, weekly metrics, notes',
-    icon: BarChart3,
-  },
-  creative: {
-    label: 'Creative Bank',
-    to: '/creative',
-    description: 'Searchable content learnings library',
-    icon: Sparkles,
-  },
-}
-
-const ROLE_ACCESS: Record<Role, string[]> = {
-  founder: ['founder', 'am', 'creative'],
-  manager: ['founder', 'am', 'creative'],
-  am: ['am', 'creative'],
-  creator: ['creative'],
+function greet(name: string) {
+  const h = new Date().getHours()
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'
+  return `${g}, ${name.split(' ')[0]}.`
 }
 
 export default function Dashboard() {
   const user = getCurrentUser()!
-  const today = new Date().toLocaleDateString('en-IN', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  const isFounder = user.role === 'founder' || user.role === 'manager'
+
+  // Role-aware brand visibility
+  const brands = getBrandsForUser(user.name, user.role)
+
+  // Aggregate totals across visible brands
+  let totalReach = 0, totalLikes = 0, totalShares = 0, totalPosts = 0
+  brands.forEach((b) => {
+    const m = BRAND_METRICS.find((bm) => bm.brandId === b.id)
+    const f = FORTNIGHT_BRAND[b.id]
+    if (f) totalPosts += f.postsPublished
+    m?.platforms.forEach((p) => {
+      totalReach += p.primary.value
+      p.secondary.forEach((s) => {
+        if (['Likes', 'Reactions'].includes(s.label)) totalLikes += s.value
+        if (['Shares', 'Reposts'].includes(s.label)) totalShares += s.value
+      })
+    })
   })
-  const accessKeys = ROLE_ACCESS[user.role]
+
+  const avgEng = brands.length
+    ? (
+        brands.reduce((sum, b) => sum + (FORTNIGHT_BRAND[b.id]?.engagementRate ?? 0), 0) /
+        brands.length
+      ).toFixed(2)
+    : '0.00'
+
+  const today = new Date().toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  })
 
   return (
     <div>
+      {/* Header */}
       <header className="mb-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-text-primary">
-          Welcome back, {user.name.split(' ')[0]}.
-        </h1>
-        <p className="mt-1 text-sm text-text-secondary">{today}</p>
+        <p className="mb-1 text-xs text-white/40">{today}</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-white">{greet(user.name)}</h1>
+        <p className="mt-1 text-sm text-white/50">Week — {FORTNIGHT_PERIOD}</p>
       </header>
 
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <StatCard label="Brands" value={BRANDS.length} sub="active accounts" />
-        <StatCard label="Team" value={PEOPLE.length} sub="people tracked" />
-        <StatCard label="Role" value={ROLE_LABELS[user.role]} sub="current access" />
+      {/* 5 stat cards */}
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
+        <StatCard label="Reach" value={formatNumber(totalReach)} sub="this week" />
+        <StatCard label="Likes" value={formatNumber(totalLikes)} sub="across platforms" />
+        <StatCard label="Shares" value={formatNumber(totalShares)} sub="across platforms" />
+        <StatCard label="Posts" value={totalPosts} sub="published" />
+        <StatCard label="Brands" value={brands.length} sub="active accounts" />
       </div>
 
-      <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-muted">
-          Quick access
-        </h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {accessKeys.map((key) => {
-            const link = QUICK_LINKS[key]
-            const Icon = link.icon
-            return (
-              <Link to={link.to} key={key} className="block">
-                <Card hover>
-                  <div className="flex items-start justify-between">
-                    <div className="rounded-lg bg-accent/15 p-2.5 text-accent">
-                      <Icon size={20} />
-                    </div>
-                    <ArrowRight size={16} className="text-text-muted" />
-                  </div>
-                  <div className="mt-4 text-base font-semibold text-text-primary">
-                    {link.label}
-                  </div>
-                  <div className="mt-1 text-xs text-text-secondary">{link.description}</div>
-                </Card>
-              </Link>
-            )
-          })}
-        </div>
-      </section>
+      {/* Avg engagement strip */}
+      <div className="mb-10 flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 px-5 py-3">
+        <TrendingUp size={15} className="text-green-400" />
+        <span className="text-sm text-white/60">Average engagement rate</span>
+        <span className="ml-auto text-sm font-semibold text-white">{avgEng}%</span>
+      </div>
 
-      <section className="mt-8">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-muted">
-          This week
-        </h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Card>
-            <div className="text-xs uppercase tracking-wider text-text-muted">
-              New creative entries
-            </div>
-            <div className="mt-2 text-2xl font-semibold">{CREATIVE_ENTRIES.length}</div>
-            <div className="mt-3 space-y-1">
-              {CREATIVE_ENTRIES.slice(0, 3).map((c) => (
-                <div key={c.id} className="text-xs text-text-secondary">
-                  <span className="text-text-primary">{c.title}</span> — {c.brand}
-                </div>
-              ))}
-            </div>
-          </Card>
-          <Card>
-            <div className="text-xs uppercase tracking-wider text-text-muted">Brand snapshot</div>
-            <div className="mt-2 text-2xl font-semibold">{BRANDS.length} brands</div>
-            <div className="mt-3 space-y-1">
-              {BRANDS.map((b) => (
-                <div key={b.id} className="flex items-center justify-between text-xs">
-                  <span className="text-text-primary">{b.name}</span>
-                  <span className="text-text-secondary">{b.amName}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-      </section>
+      {/* Top performing posts */}
+      <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/35">
+        Top performing posts — this week
+      </h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {TOP_POSTS_FORTNIGHT.map((post, i) => (
+          <PostCard key={post.id} post={post} rank={i + 1} />
+        ))}
+      </div>
+
+      {/* Team section — founders only */}
+      {isFounder && (
+        <>
+          <h2 className="mb-4 mt-10 text-xs font-semibold uppercase tracking-wider text-white/35">
+            Team this week
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+            {PEOPLE.map((p) => {
+              const cs = CREATOR_FORTNIGHT[p.name]
+              return (
+                <Card key={p.id}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium text-white">{p.name}</div>
+                      <div className="text-xs text-white/40">{p.role}</div>
+                    </div>
+                    {cs && (
+                      <div className="text-right text-xs">
+                        <div className="font-semibold text-white">{cs.postsLive} posts</div>
+                        <div className="text-white/35">{cs.entriesLogged} entries</div>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        </>
+      )}
     </div>
   )
 }

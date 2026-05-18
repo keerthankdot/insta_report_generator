@@ -10,6 +10,7 @@ import AMDashboard from './pages/am/AMDashboard'
 import BrandDetail from './pages/am/BrandDetail'
 import CreativeBank from './pages/creative/CreativeBank'
 import AddEntry from './pages/creative/AddEntry'
+import MyBrands from './pages/MyBrands'
 
 function ProtectedRoute({
   children,
@@ -44,6 +45,16 @@ export default function App() {
         }
       />
 
+      {/* My Brands — everyone */}
+      <Route
+        path="/brands"
+        element={
+          <AuthenticatedRoute>
+            <MyBrands />
+          </AuthenticatedRoute>
+        }
+      />
+
       {/* Founder OS — founder + manager only */}
       <Route
         path="/founder"
@@ -74,7 +85,7 @@ export default function App() {
       <Route
         path="/am/:id"
         element={
-          <ProtectedRoute allowedRoles={['founder', 'manager', 'am']}>
+          <ProtectedRoute allowedRoles={['founder', 'manager', 'am', 'creator']}>
             <BrandDetail />
           </ProtectedRoute>
         }

@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Star } from 'lucide-react'
 import { Card } from '../../components/ui/Card'
 import { getCurrentUser } from '../../lib/auth'
-import type { ContentCategory, Platform } from '../../lib/data'
+import { BRANDS, type ContentCategory, type Platform } from '../../lib/data'
 
 const CATEGORIES: ContentCategory[] = ['Humour', 'Trend', 'Education', 'Storytelling', 'Promo']
 const PLATFORMS: Platform[] = ['Instagram', 'LinkedIn', 'YouTube', 'X']
-const BRAND_NAMES = ['Tinder India', 'Dunkin India']
+const BRAND_NAMES = BRANDS.map((b) => b.name)
 
 export default function AddEntry() {
   const navigate = useNavigate()

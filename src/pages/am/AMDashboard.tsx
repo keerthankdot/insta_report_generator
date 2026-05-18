@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import { Card } from '../../components/ui/Card'
 import { PlatformBadge } from '../../components/ui/Badge'
-import { BRANDS } from '../../lib/data'
+import { getBrandsForUser } from '../../lib/data'
+import { getCurrentUser } from '../../lib/auth'
 
 const STATUS_DOT: Record<string, string> = {
   active: 'bg-emerald-500',
@@ -11,6 +12,9 @@ const STATUS_DOT: Record<string, string> = {
 }
 
 export default function AMDashboard() {
+  const user = getCurrentUser()!
+  const brands = getBrandsForUser(user.name, user.role)
+
   return (
     <div>
       <header className="mb-8">
@@ -23,7 +27,7 @@ export default function AMDashboard() {
       </header>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {BRANDS.map((b) => (
+        {brands.map((b) => (
           <Link key={b.id} to={`/am/${b.id}`}>
             <Card hover>
               <div className="flex items-start justify-between">

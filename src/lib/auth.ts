@@ -15,6 +15,13 @@ export const DEMO_USERS: User[] = [
 
 const STORAGE_KEY = 'tnt_os_user'
 
+export function checkEmail(email: string): 'found' | 'not_found' | 'invalid' {
+  const trimmed = email.trim()
+  if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'invalid'
+  const exists = DEMO_USERS.some((u) => u.email.toLowerCase() === trimmed.toLowerCase())
+  return exists ? 'found' : 'not_found'
+}
+
 export function login(email: string, password: string): User | null {
   if (password !== 'demo') return null
   const normalized = email.trim().toLowerCase()
