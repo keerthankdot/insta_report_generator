@@ -674,3 +674,124 @@ The build is done when:
 - This CLAUDE.md covers the demo build only. When TNT signs, create a separate CLAUDE.md for the production build with API integration.
 - The column_maps.json will need updating as Meta and X change their export formats. Keep it as the single source of truth for column name handling.
 - If Viren asks "can this do YouTube too?", the answer is yes. YouTube Studio also exports CSV. The architecture is the same: processor + sheet writer + Looker Studio. Scope it as Phase 2.
+
+---
+
+## STAFF TURNOVER: HOW TO HANDLE PEOPLE LEAVING TNT OS
+
+This section defines the exact rules for what happens when a creator, account manager, or manager exits TNT. These rules must be followed precisely every time someone leaves.
+
+### Core principle: Never delete. Always deactivate.
+
+Deleting a person from the system destroys historical record. Every Creative Bank entry, every brand contribution, every note is tied to a name. That record belongs to TNT, not the individual. When someone leaves, their past work stays. Only their active presence is removed.
+
+---
+
+### Data model: Person status field
+
+The Person type in src/lib/data.ts must have a status field:
+
+```ts
+export interface Person {
+  id: string
+  name: string
+  role: string
+  team: 'Creative' | 'Accounts' | 'Strategy' | 'Production'
+  trajectory: Trajectory
+  avatarInitials: string
+  joinedDate: string
+  status: 'active' | 'offboarded'   // ADD THIS
+  offboardedDate?: string            // ADD THIS
+}
+```
+
+All existing people default to status: 'active'. This field has not been implemented yet. Build it when TNT signs and goes to production.
+
+---
+
+### When someone leaves: the four steps
+
+**Step 1: Mark them offboarded in PEOPLE.**
+Set status to 'offboarded' and add offboardedDate. Do not remove the entry.
+
+```ts
+{
+  id: 'p1',
+  name: 'Shraddha',
+  status: 'offboarded',
+  offboardedDate: '2026-06-01',
+  // rest unchanged
+}
+```
+
+**Step 2: Remove them from brand assignments.**
+
+For creators: remove their name from creatorNames on every brand they appear in. Add the replacement creator's name. If no replacement yet, the array simply shrinks.
+
+For account managers: update amName on every brand they managed to the new AM's name. A brand must always have an amName. Do not leave it blank.
+
+For managers: no brand reassignment needed. Just mark offboarded.
+
+**Step 3: Disable their login.**
+
+Remove their entry from the USERS array in src/lib/auth.ts. They will get a 'not found' error on login attempt. Their name remains everywhere else in the system.
+
+**Step 4: Leave all historical data untouched.**
+
+CreativeEntry records keep creatorName as the original name. Notes keep authorName as original. BrandDetail weekly data is not touched. The audit trail must be complete and accurate.
+
+---
+
+### What stays vs. what goes
+
+| Data | What happens |
+|------|-------------|
+| Person entry in PEOPLE | Stays. Status set to offboarded. |
+| Creative Bank entries | Stay. creatorName unchanged. |
+| Manager notes on their profile | Stay. Visible in FounderOS archive. |
+| Brand assignments (creatorNames / amName) | Updated to new person immediately. |
+| Login access | Removed from auth.ts immediately. |
+| CREATOR_FORTNIGHT / team dashboard | Filter out offboarded people from active views. |
+| Dashboard team section | Only show active people. |
+
+---
+
+### UI rules for offboarded people
+
+When status field is implemented:
+
+1. FounderOS team grid: show only active people by default. Add an "Alumni" toggle for founders to view offboarded people.
+2. Creative Bank entries: show the creator's name as-is. Do not add a badge or flag. The entry stands on its own.
+3. Brand assignment dropdowns: show only active people when assigning.
+4. Sidebar role switcher: only active people can be switched to.
+
+---
+
+### Future: offboarding UI for founders
+
+When TNT goes to production with a real database, build an offboarding flow under FounderOS:
+
+1. Founder selects person and clicks "Offboard".
+2. System shows all their brand assignments and asks for replacement for each.
+3. Founder assigns replacements in one screen.
+4. System marks person offboarded, updates brand assignments, disables login.
+5. Confirmation screen shows what changed.
+
+This replaces the current manual data.ts edit process. Do not build this for the demo. Scope it as a production feature.
+
+---
+
+### Replacement / rehire rule
+
+If someone leaves and comes back, create a new Person entry with a new id. Do not reactivate the old entry. This keeps the timeline clean and ensures their old and new tenures are separate records.
+
+---
+
+### Summary: what to do right now when someone leaves (demo phase)
+
+1. Set status: 'offboarded' and offboardedDate on their Person entry in data.ts (field not yet built, add it when implementing).
+2. Remove their name from creatorNames on their brands. Add replacement.
+3. Update amName on their brands if they were an AM. Add replacement.
+4. Delete their entry from USERS in auth.ts.
+5. Do not touch Creative Bank entries, notes, or weekly data.
+6. Filter them out of active team views using the status field.
