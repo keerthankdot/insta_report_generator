@@ -3,6 +3,7 @@ export type NoteType = 'Win' | 'Loss' | 'Growth Note' | 'Feedback Area' | 'Obser
 export type Urgency = 'Low' | 'Medium' | 'High'
 export type Platform = 'Instagram' | 'LinkedIn' | 'YouTube' | 'X'
 export type ContentCategory = 'Humour' | 'Trend' | 'Education' | 'Storytelling' | 'Promo'
+export type ContentType = 'Reel' | 'Static' | 'Carousel' | 'Tweet'
 
 export interface Person {
   id: string
@@ -55,12 +56,22 @@ export interface TrendPoint {
 
 export interface CreativeEntry {
   id: string
+  contentType: ContentType
   category: ContentCategory
   platform: Platform
   brand: string
   title: string
+  liveLink?: string
   insight: string
-  rating: number
+  views?: number
+  likes?: number
+  shares?: number
+  benchmarkMet?: boolean
+  selfRating: number
+  explainRating?: string
+  whatIdChange?: string
+  managerRating?: number
+  otherWins?: string
   creatorName: string
   dateAdded: string
 }
@@ -111,51 +122,20 @@ export const WEEKS = [
 
 // ===== People =====
 export const PEOPLE: Person[] = [
-  {
-    id: 'p1',
-    name: 'Ananya Sharma',
-    role: 'Senior Copywriter',
-    team: 'Creative',
-    trajectory: 'Rising',
-    avatarInitials: 'AS',
-    joinedDate: '2024-08-12',
-  },
-  {
-    id: 'p2',
-    name: 'Rohan Mehta',
-    role: 'Account Manager',
-    team: 'Accounts',
-    trajectory: 'Steady',
-    avatarInitials: 'RM',
-    joinedDate: '2023-05-02',
-  },
-  {
-    id: 'p3',
-    name: 'Priya Nair',
-    role: 'Art Director',
-    team: 'Creative',
-    trajectory: 'Needs Attention',
-    avatarInitials: 'PN',
-    joinedDate: '2024-02-18',
-  },
-  {
-    id: 'p4',
-    name: 'Kabir Das',
-    role: 'Social Media Manager',
-    team: 'Creative',
-    trajectory: 'New',
-    avatarInitials: 'KD',
-    joinedDate: '2026-03-01',
-  },
-  {
-    id: 'p5',
-    name: 'Shreya Patel',
-    role: 'Account Executive',
-    team: 'Accounts',
-    trajectory: 'Rising',
-    avatarInitials: 'SP',
-    joinedDate: '2025-01-09',
-  },
+  { id: 'p1',  name: 'Shraddha',  role: 'Creator', team: 'Creative', trajectory: 'Rising',          avatarInitials: 'SH', joinedDate: '2025-01-01' },
+  { id: 'p2',  name: 'Hari',      role: 'Creator', team: 'Creative', trajectory: 'Steady',          avatarInitials: 'HA', joinedDate: '2025-01-01' },
+  { id: 'p3',  name: 'Anand',     role: 'Creator', team: 'Creative', trajectory: 'Rising',          avatarInitials: 'AN', joinedDate: '2025-01-01' },
+  { id: 'p4',  name: 'Vedant',    role: 'Creator', team: 'Creative', trajectory: 'Steady',          avatarInitials: 'VE', joinedDate: '2025-01-01' },
+  { id: 'p5',  name: 'Stuti',     role: 'Creator', team: 'Creative', trajectory: 'Rising',          avatarInitials: 'ST', joinedDate: '2025-01-01' },
+  { id: 'p6',  name: 'Manisha',   role: 'Creator', team: 'Creative', trajectory: 'Steady',          avatarInitials: 'MA', joinedDate: '2025-01-01' },
+  { id: 'p7',  name: 'Jonathan',  role: 'Creator', team: 'Creative', trajectory: 'New',             avatarInitials: 'JO', joinedDate: '2025-06-01' },
+  { id: 'p8',  name: 'Mahek',     role: 'Creator', team: 'Creative', trajectory: 'Steady',          avatarInitials: 'MH', joinedDate: '2025-01-01' },
+  { id: 'p9',  name: 'Shreya',    role: 'Creator', team: 'Creative', trajectory: 'Rising',          avatarInitials: 'SR', joinedDate: '2025-01-01' },
+  { id: 'p10', name: 'Jishnu',    role: 'Creator', team: 'Creative', trajectory: 'Steady',          avatarInitials: 'JI', joinedDate: '2025-01-01' },
+  { id: 'p11', name: 'Shruti',    role: 'Creator', team: 'Creative', trajectory: 'Needs Attention', avatarInitials: 'SU', joinedDate: '2025-01-01' },
+  { id: 'p12', name: 'Niveditha', role: 'Creator', team: 'Creative', trajectory: 'New',             avatarInitials: 'NI', joinedDate: '2025-06-01' },
+  { id: 'p13', name: 'Rohan Mehta',  role: 'Account Manager',   team: 'Accounts', trajectory: 'Steady', avatarInitials: 'RM', joinedDate: '2023-05-02' },
+  { id: 'p14', name: 'Shreya Patel', role: 'Account Executive',  team: 'Accounts', trajectory: 'Rising', avatarInitials: 'SP', joinedDate: '2025-01-09' },
 ]
 
 // ===== Notes =====
@@ -259,7 +239,7 @@ export const BRANDS: Brand[] = [
     platforms: ['Instagram', 'X'],
     status: 'active',
     color: '#8B5CF6',
-    creatorNames: ['Ananya Sharma', 'Kabir Das'],
+    creatorNames: ['Shraddha', 'Hari', 'Anand'],
   },
   {
     id: 'wakefit',
@@ -268,7 +248,7 @@ export const BRANDS: Brand[] = [
     platforms: ['Instagram'],
     status: 'active',
     color: '#0EA5E9',
-    creatorNames: ['Priya Nair'],
+    creatorNames: ['Vedant', 'Stuti'],
   },
   {
     id: 'tinder',
@@ -277,7 +257,7 @@ export const BRANDS: Brand[] = [
     platforms: ['Instagram'],
     status: 'active',
     color: '#FF6B6B',
-    creatorNames: ['Ananya Sharma'],
+    creatorNames: ['Manisha', 'Jonathan'],
   },
   {
     id: 'epigamia',
@@ -286,7 +266,7 @@ export const BRANDS: Brand[] = [
     platforms: ['Instagram'],
     status: 'attention',
     color: '#F97316',
-    creatorNames: ['Kabir Das'],
+    creatorNames: ['Mahek', 'Shreya'],
   },
   {
     id: 'phonepe',
@@ -295,7 +275,7 @@ export const BRANDS: Brand[] = [
     platforms: ['Instagram'],
     status: 'active',
     color: '#5F259F',
-    creatorNames: ['Priya Nair', 'Kabir Das'],
+    creatorNames: ['Shraddha', 'Jishnu', 'Shruti'],
   },
   {
     id: 'league',
@@ -304,7 +284,7 @@ export const BRANDS: Brand[] = [
     platforms: ['Instagram', 'X'],
     status: 'attention',
     color: '#10B981',
-    creatorNames: ['Ananya Sharma'],
+    creatorNames: ['Niveditha', 'Hari'],
   },
 ]
 
@@ -564,39 +544,74 @@ export const AM_NOTES: AMNote[] = [
 export const CREATIVE_ENTRIES: CreativeEntry[] = [
   {
     id: 'c1',
-    category: 'Humour',
+    contentType: 'Static',
+    category: 'Trend',
     platform: 'Instagram',
-    brand: 'Tinder India',
-    title: 'When you match but they have 9 pictures and you have 0',
-    insight:
-      'Self-deprecating humour carousel. Plays on the universal anxiety of having no photos to put on the app. 1.2M views, 45k saves. Saved >> shared, suggests people are tagging themselves not friends.',
-    rating: 4,
-    creatorName: 'Ananya Sharma',
-    dateAdded: '2026-05-10',
+    brand: 'FK',
+    title: 'Met Gala | If the theme was art, why did no one dress like"',
+    liveLink: 'https://www.instagram.com/p/example1',
+    insight: "We've all made the classic 2 hills, one house drawing in art class as kids",
+    likes: 6914,
+    shares: 273,
+    benchmarkMet: true,
+    selfRating: 3,
+    explainRating: 'The nostalgic insight — which would make you want to comment about your school experience',
+    whatIdChange: "I'd post it within hours of the event",
+    creatorName: 'Shraddha',
+    dateAdded: '2026-05-08',
   },
   {
     id: 'c2',
+    contentType: 'Static',
     category: 'Trend',
     platform: 'Instagram',
-    brand: 'Epigamia',
-    title: 'Girl dinner yogurt reel',
-    insight:
-      'Jumped on the "girl dinner" trend with a yogurt parfait as the meal. Reach was okay but engagement low — trend was past peak by 5 days. Lesson: react to trends within 72 hours or skip.',
-    rating: 3,
-    creatorName: 'Kabir Das',
-    dateAdded: '2026-05-07',
+    brand: 'FK',
+    title: "Met Gala | Where's my invite",
+    liveLink: 'https://www.instagram.com/p/example2',
+    insight: "Isha Ambani wore a mango bag to the red carpet",
+    likes: 274,
+    shares: 8,
+    selfRating: 2,
+    explainRating: '-',
+    whatIdChange: "The connection to Isha Ambani's outfit was not direct without her image as a reference. Could've gone for something simpler like Swiggy.",
+    creatorName: 'Shraddha',
+    dateAdded: '2026-05-08',
   },
   {
     id: 'c3',
-    category: 'Education',
+    contentType: 'Reel',
+    category: 'Humour',
     platform: 'Instagram',
-    brand: 'Tinder India',
-    title: '5 things that changed about online dating after 25',
-    insight:
-      'Carousel on dating behaviour shifts in late 20s. Hit a nerve — 3.4k reactions, 280 comments, mostly women in 26-32 age band. Top comment thread became its own discussion.',
-    rating: 5,
-    creatorName: 'Ananya Sharma',
-    dateAdded: '2026-05-02',
+    brand: 'PhonePe',
+    title: 'Life of an Elder Sister',
+    liveLink: 'https://www.instagram.com/p/example3',
+    insight: 'Younger siblings constantly nag their didi/bhaiya for money by sending QR codes, asking for OTP, etc.',
+    views: 21900,
+    likes: 130,
+    shares: 19,
+    selfRating: 3,
+    explainRating: '"Song overlapping rant" format was trending',
+    whatIdChange: 'The video is not native-looking, it\'s too stiff. The punchline of the PhonePe audio is coming too late. Trend hashtag.',
+    creatorName: 'Shraddha',
+    dateAdded: '2026-05-10',
+  },
+  {
+    id: 'c4',
+    contentType: 'Tweet',
+    category: 'Humour',
+    platform: 'X',
+    brand: 'FK',
+    title: 'Chat is this a bhagona or tapeli?',
+    liveLink: 'https://x.com/example4',
+    insight: 'This vessel has different names in different households',
+    views: 8800,
+    likes: 16,
+    benchmarkMet: false,
+    selfRating: 3,
+    explainRating: '-',
+    whatIdChange: 'We need to seed responses in the first few hours of posting to get the momentum going — maybe even get some brand banter involved.',
+    creatorName: 'Shraddha',
+    dateAdded: '2026-05-12',
   },
 ]
 
@@ -734,11 +749,18 @@ export const CREATOR_FORTNIGHT: Record<string, {
   topCategory: string
   postsLive: number
 }> = {
-  'Ananya Sharma': { entriesLogged: 6, avgRating: 4.2, topCategory: 'Humour', postsLive: 11 },
-  'Rohan Mehta':  { entriesLogged: 3, avgRating: 3.8, topCategory: 'Education', postsLive: 7 },
-  'Priya Nair':   { entriesLogged: 5, avgRating: 4.5, topCategory: 'Storytelling', postsLive: 9 },
-  'Kabir Das':    { entriesLogged: 4, avgRating: 3.5, topCategory: 'Trend', postsLive: 8 },
-  'Shreya Patel': { entriesLogged: 2, avgRating: 4.0, topCategory: 'Promo', postsLive: 6 },
+  'Shraddha':  { entriesLogged: 4, avgRating: 3.0, topCategory: 'Reel',     postsLive: 4 },
+  'Hari':      { entriesLogged: 3, avgRating: 3.3, topCategory: 'Static',   postsLive: 3 },
+  'Anand':     { entriesLogged: 3, avgRating: 3.7, topCategory: 'Carousel', postsLive: 3 },
+  'Vedant':    { entriesLogged: 2, avgRating: 4.0, topCategory: 'Reel',     postsLive: 2 },
+  'Stuti':     { entriesLogged: 3, avgRating: 3.5, topCategory: 'Static',   postsLive: 3 },
+  'Manisha':   { entriesLogged: 4, avgRating: 4.2, topCategory: 'Carousel', postsLive: 4 },
+  'Jonathan':  { entriesLogged: 2, avgRating: 3.0, topCategory: 'Reel',     postsLive: 2 },
+  'Mahek':     { entriesLogged: 3, avgRating: 3.8, topCategory: 'Static',   postsLive: 3 },
+  'Shreya':    { entriesLogged: 4, avgRating: 4.5, topCategory: 'Reel',     postsLive: 4 },
+  'Jishnu':    { entriesLogged: 3, avgRating: 3.3, topCategory: 'Carousel', postsLive: 3 },
+  'Shruti':    { entriesLogged: 2, avgRating: 2.5, topCategory: 'Static',   postsLive: 2 },
+  'Niveditha': { entriesLogged: 1, avgRating: 3.0, topCategory: 'Reel',     postsLive: 1 },
 }
 
 // ===== Top performing posts this fortnight (derived from real peaks) =====
