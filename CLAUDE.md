@@ -795,3 +795,316 @@ If someone leaves and comes back, create a new Person entry with a new id. Do no
 4. Delete their entry from USERS in auth.ts.
 5. Do not touch Creative Bank entries, notes, or weekly data.
 6. Filter them out of active team views using the status field.
+
+---
+
+## AM TRACKER: FULL PRODUCT SPEC
+
+This section defines exactly what the AM Tracker module does, how it works, what it generates, and how every decision was made. Read this before touching any AM-related code.
+
+### What the AM Tracker is
+
+The AM Tracker is the account manager's operational hub inside TNT OS. It covers three things:
+
+1. Brand health monitoring: real-time view of how each brand is performing on social
+2. Report generation: automated weekly pulse and monthly performance reports, with space for the AM to write the insight layer
+3. Content performance analysis: what worked, what didn't, and why — structured for the AM to build strategy recommendations from
+
+This is not a client-facing tool. It is internal. Reports generated here are then packaged for clients. The AM sees everything. The client sees a curated version.
+
+---
+
+### What an AM at a social-first agency actually does (context for every build decision)
+
+The AM operates across three layers simultaneously:
+
+**Client-facing (daily/weekly):**
+- Shares content calendar for approval, chases sign-offs
+- Communicates post-publish performance on key content
+- Owns the weekly sync call with the client
+- Relays client feedback back to the creative team
+
+**Internal coordination (daily/weekly):**
+- Briefs creators and designers on upcoming content batches
+- Quality gate before content goes to client for approval
+- Flags timeline risks (content due Wednesday, approval still pending Monday)
+- Coordinates trend opportunities with the creative team. At a culture-first agency, trend windows are 24-72 hours. Missed approvals kill relevance.
+
+**Analytical and strategic (weekly/monthly):**
+- Compiles weekly pulse and monthly performance reports
+- Identifies what worked, what did not, and why
+- Proposes strategy adjustments based on data
+- Preps quarterly reviews
+
+The AM escalates, does not decide on: major strategy pivots, PR issues, churn risk, legal flags, paid amplification budget.
+
+**The AM's primary value in TNT OS:** auto-generation handles the "what" layer (data, numbers, charts). The AM writes the "why and what next" layer (interpretation, recommendations, client narrative). TNT OS should save the AM 3-4 hours of data pulling per month so that time is spent on analysis and client relationship instead.
+
+---
+
+### Reporting cadence: three tiers
+
+#### Tier 1: Weekly Pulse Report
+
+- **Frequency:** Every Monday
+- **Data window:** Content published in Week -2 (not last week)
+- **Rationale for Week -2:** Content published last week is still accumulating engagement. Instagram posts accumulate saves and shares for 7-14 days. Reels can spike algorithmically days after posting. Reporting Week -1 on Monday means Friday and Saturday posts have only 2-3 days of data, which understates their performance by 30-70%. Week -2 is fully settled data.
+- **Audience:** AM internal use + brief reference during Monday client sync
+- **Format:** Email body + 1-page PDF
+- **Read time target:** 60 seconds
+- **AM writes:** One sentence of context per top post ("This Reel overperformed because of the Holi moment timing"), one optional flag line if anything needs client attention
+
+#### Tier 2: Monthly Performance Report
+
+- **Frequency:** Generated in the second week of each month
+- **Data window:** The prior full calendar month. April report generated second week of May covers April 1-30 in full.
+- **Rationale:** Waiting until the second week ensures even month-end content has had 7-14 days to accumulate. Content published April 28-30 will have settled data by May 8-12.
+- **Exception:** Flag posts published in the last 5 days of the month as "early data — still accumulating." Do not exclude them. Note them.
+- **Audience:** Client marketing team
+- **Format:** Branded PDF, 6-10 pages
+- **Read time target:** 10-15 minutes
+- **AM writes:** Executive summary (3-4 sentences, the most-read section), insight and recommendations section (2-3 specific actions), next month focus line
+
+#### Tier 3: Quarterly Business Review (QBR)
+
+- **Frequency:** Every 3 months
+- **Data window:** Full prior quarter (3 calendar months)
+- **Format:** Presentation deck, 15-20 slides. Not a PDF report.
+- **AM writes:** Most of it. The system auto-generates the 90-day scorecard and 12-week trend chart. Everything else is AM and strategist narrative.
+- **This is not a report. It is supporting material for a strategic conversation.**
+
+---
+
+### Reporting window rules: exact logic
+
+```
+Weekly report run date: any Monday
+Content window: posts published on [Monday -14 days] through [Monday -8 days]
+This is the 7-day cohort from 2 weeks prior, fully settled.
+
+Monthly report run date: any date in the 2nd week of month M
+Content window: all posts published in month M-1 (full calendar month)
+Exception flag: posts published in last 5 days of M-1 are marked "early data"
+
+Reels exception: pull metrics at 3 windows — 7-day, 14-day, 30-day
+If a Reel published in month M-1 had its primary distribution spike in month M,
+note it in the monthly report as "post-period surge — still accumulating"
+```
+
+---
+
+### KPI definitions and formulas: locked in (may be revised)
+
+#### Instagram
+
+**Engagement Rate (ER):**
+Formula: (likes + comments + shares + saves) / reach × 100
+Use reach-based ER, not follower-based. Follower-based ER is misleading because algorithmic reach is never 100% of followers. A post seen by 50,000 people and getting 1,000 engagements is 2% ER by reach. Always use reach as the denominator.
+
+**Saves:**
+Tracked as a standalone metric alongside ER. As of 2026, saves are Instagram's highest-weighted engagement signal and the best indicator of content utility and cultural value. Saves are flagged prominently in reports but are not a fixed top-line metric — they may be deprioritised or repositioned depending on what TNT finds most useful in practice.
+
+**Reach:**
+Accounts reached (unique). Not impressions. Impressions count the same person multiple times. Reach is the true distribution metric for organic content.
+
+**Shares:**
+Tracked separately. Shares to stories expand reach to new audiences. DM shares indicate the content triggered a conversation. Both are high-intent signals.
+
+**Story views:**
+Tracked at account level monthly. Declining story views are an early warning signal — the loyal core audience is disengaging before the casual audience does.
+
+**Net followers:**
+Monthly indicator. Tracked but not a primary weekly KPI. Sudden unfollows spike = brand fatigue or a post that alienated the existing audience.
+
+**Reel-specific — 3 windows required:**
+- 7-day views and ER
+- 14-day views and ER
+- 30-day views and ER
+Reels distribute algorithmically in waves. A Reel sitting at 5,000 views on day 7 may hit 80,000 views by day 14 if a share chain triggers wider algorithmic distribution. Single-window Reel measurement is unreliable.
+
+#### X/Twitter
+
+**Impressions:**
+Primary metric on X. Everything else is secondary context.
+
+**Engagement Rate:**
+Formula: total engagements / impressions × 100
+Realistic range for active brand accounts: 0.5%-1.0%
+X ER is structurally lower than Instagram ER. Do not compare them directly. They are different platforms with different engagement mechanics.
+
+**Reposts:**
+Highest-quality reach amplifier on X. Tracked separately.
+
+**Replies:**
+Rarest engagement but highest quality. Indicates the content triggered a response. This is the culture-first signal on X.
+
+**Link clicks:**
+Off-platform intent signal. Tracked where available.
+
+---
+
+### Benchmarks: how they are set and used
+
+**Primary benchmark: per-brand, per-content-type, 90-day trailing median**
+
+Do not compare a brand's Reel ER to its static ER. Content types have structurally different engagement rates. Benchmarks are set separately for each content type within each brand.
+
+Formula:
+- Pull all posts for brand X, content type Y, from the last 90 days
+- Calculate the median ER (not average — median is more resistant to outliers)
+- That median is the brand floor for that content type
+- Brand target = brand floor × 1.2 (20% above floor as the stretch goal)
+
+**Secondary benchmark: industry average (for context only)**
+Industry averages from sources like Rival IQ, SocialInsider, or Sprout Social are shown as context in the QBR, not as primary report benchmarks. A brand's own history is more relevant than what a different brand in a vaguely similar category does.
+
+**Benchmark review cadence:** Reassess every quarter. Platform algorithm changes can shift baseline performance for all accounts — if every brand's ER drops 10% in the same month, it is likely an algorithm event, not a brand problem.
+
+**The benchmark overview sheet (from Creative Audit):**
+TNT already maintains brand benchmarks in the Creative Audit Google Sheet (Overview tab). These benchmark values (views, likes, shares targets by content type per brand) should be imported into TNT OS as the initial benchmark layer. The system should surface a "benchmark met / not met" flag per post automatically.
+
+---
+
+### Content type performance: how it is tracked and reported
+
+Content types in TNT OS: Reel, Static, Carousel, Tweet (for X)
+
+For each content type, track:
+- Number of posts published in the period
+- Average ER for that type in the period
+- Best performing post of that type (by ER)
+- Comparison to prior period average ER for that type
+- Comparison to the brand's 90-day benchmark for that type
+
+Never mix content types in a single ER average. The monthly report must show content type performance as a separate section with its own chart. This directly answers the client question "should we make more Reels or more carousels?" with data.
+
+---
+
+### What worked / what did not: the AM analysis framework
+
+When a post overperforms (top 20% of ER for its content type in the period):
+- What triggered the spike: saves, shares, or comments?
+- Was it culturally timed to a moment?
+- Was it a new format the audience responded to?
+- Can this become a content series?
+- Did it bring in new followers (growth spike) or engage existing ones (ER spike without follower change)?
+
+When a post underperforms (bottom 20% of ER for its content type):
+- Was the hook weak in the first 1-2 seconds (for Reels) or first frame (carousels)?
+- Was trending audio already past peak when published?
+- Was the format tired — same template used 3 or more consecutive posts?
+- Was there a platform algorithm event that week affecting organic reach broadly?
+- Was the posting time unusual for this brand?
+
+**The AM recommendation standard:**
+"Post X did well" = observation, not an AM output.
+"Post X did well because of Y, therefore we should do Z next month" = AM value.
+Every recommendation in the report must follow: data point → reason → action.
+
+---
+
+### Two report versions: client-facing and internal
+
+#### Client-facing report contains:
+- Executive summary (AM-written, plain language)
+- Top-line metrics vs. prior period (reach, ER, follower growth)
+- Top 3-5 posts with metrics
+- Content type performance breakdown
+- Platform narrative (AM-written: why these numbers look the way they do)
+- 2-3 recommendations framed as opportunities, not failures
+- Next month focus
+
+#### Client-facing report deliberately excludes:
+- Bottom performing posts
+- Internal disagreements about strategy direction
+- Operational notes (approval delays, timeline slippages)
+- Negative framing of client decisions that contributed to underperformance
+- Granular post-by-post data dump
+
+#### Internal report additionally contains:
+- Full post-by-post performance table
+- Bottom 3 posts with AM analysis of why they underperformed
+- Content approval timeline notes (how late was the client on approvals?)
+- Account health flag (is this brand at risk of churn?)
+- AM recommendation for strategy adjustments the client has not agreed to yet
+- Hours worked vs. hours budgeted (for agency leadership view)
+
+---
+
+### Weekly pulse report: exact structure
+
+Auto-generated sections (system produces):
+1. Header: brand name, platform(s), dates covered (Week -2 range)
+2. Three headline numbers: total reach, average ER, net followers — each with vs. prior week delta and direction arrow
+3. Top post card: content type badge, reach, ER, top engagement signal (saves / shares / comments), date published
+4. Bottom post flag: lowest ER post of the week, content type, ER
+
+AM-written sections (AM fills in):
+5. One sentence of context on the top post
+6. One optional flag line for anything needing client attention
+7. What is publishing this week (one line)
+
+---
+
+### Monthly performance report: exact structure
+
+Auto-generated sections:
+1. Cover: brand name, month, platform(s)
+2. Month-at-a-glance scorecard: total reach, total views, average ER, follower count and net change, total posts published — each with vs. prior month % change and direction arrow
+3. Platform breakdown: one section per platform, key metrics table, time series chart (weekly reach trend across the month)
+4. Content type performance: table showing avg ER, post count, and best post per content type (Reel, Static, Carousel, Tweet). One bar chart.
+5. Top 5 posts: ranked by ER, showing content type, reach, ER, top metric, date. Flag any Reel with "14-day data" or "30-day data" if measured at extended window.
+6. Bottom 3 posts: shown in internal version only. Same format as top 5.
+7. Week-over-week reach trend chart: line chart across all 4-5 weeks of the month.
+
+AM-written sections:
+8. Executive summary: 3-4 sentences. What this month looked like. The one thing that worked and one thing to address. This is the most-read section of the entire report.
+9. Insights and recommendations: 200-400 words. 2-3 specific actions for next month. Each must follow: data point → reason → action.
+10. Next month focus: one sentence. What the creative strategy will test or emphasise.
+
+---
+
+### Brand health signals: what TNT OS should surface automatically
+
+**Green signals (healthy):**
+- ER stable or increasing vs. 90-day baseline for that content type
+- Reach expanding over time
+- Story views holding steady month-over-month
+- Saves growing (even slightly)
+- Net followers positive
+- Benchmark met rate above 60% for the month
+
+**Amber signals (watch):**
+- ER declining for 2 consecutive weeks for any content type
+- Story views down more than 10% month-over-month
+- Benchmark met rate below 40% for the month
+- Net follower growth stalling (near zero)
+
+**Red signals (flag to manager):**
+- ER declining for 3+ consecutive weeks
+- Net unfollows in a month
+- Saves declining while reach holds (content is being seen but not valued)
+- Story views down more than 25% month-over-month
+- Benchmark met rate below 20% for the month
+
+These signals should appear as a health indicator on each brand card in the AM Tracker. Green, amber, or red. One-line reason. The AM sees this at a glance and knows which brands need attention this week.
+
+---
+
+### What TNT OS auto-generates vs. what the AM writes: the clear line
+
+| Layer | Who produces it | What it contains |
+|-------|----------------|------------------|
+| Data aggregation | System | All platform metrics for the date window |
+| KPI calculations | System | ER, reach, saves, follower delta, week-over-week % |
+| Charts and visualisations | System | Time series, bar charts, content type breakdown |
+| Top/bottom post ranking | System | Sorted by ER, with metrics |
+| Basic delta callouts | System | "+12% reach vs. last month" |
+| Benchmark met/not met flag | System | Per post, per content type |
+| Executive summary | AM | 3-4 sentences of narrative |
+| Why it happened | AM | Cultural context, trend context, strategic interpretation |
+| Recommendations | AM | Data point → reason → action format |
+| Client relationship framing | AM | How to present a bad month without losing trust |
+| Next month strategy | AM | What to test, what to retire, what to double down on |
+
+The AM never touches a spreadsheet to compile this report. The system does that. The AM opens the report, reads the auto-generated data layer, writes the insight layer, and sends it. That is the product.
