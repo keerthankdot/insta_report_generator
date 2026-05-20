@@ -615,6 +615,136 @@ export const CREATIVE_ENTRIES: CreativeEntry[] = [
   },
 ]
 
+// ===== AM Report types =====
+
+export type HealthSignal = 'green' | 'amber' | 'red'
+
+export interface BrandPost {
+  id: string
+  brandId: string
+  title: string
+  contentType: ContentType
+  platform: Platform
+  date: string
+  reach?: number
+  impressions?: number
+  er: number
+  likes?: number
+  comments?: number
+  shares?: number
+  saves?: number
+  url?: string
+  reel14dEr?: number
+  reel30dEr?: number
+}
+
+export interface ContentTypeStat {
+  contentType: ContentType
+  postCount: number
+  avgEr: number
+  bestPostTitle: string
+  bestPostEr: number
+}
+
+// Reporting constants
+export const PULSE_WEEK_IDX   = 8                   // May 6 week (Week -2 from May 20)
+export const PRIOR_WEEK_IDX   = 5                   // Apr 15 (last non-null before May 6 gap)
+export const PULSE_PERIOD     = 'May 6 – May 12'
+export const MONTHLY_PERIOD_LABEL = 'April 2026'
+export const MONTHLY_WEEK_IDXS    = [3, 4, 5, 6, 7] // Apr 1, 8, 15, 22, 29
+export const PREV_MONTH_WEEK_IDXS = [0, 1, 2]       // Mar 11, 18, 25
+
+// ===== Post-level data for April (monthly report period) =====
+
+export const BRAND_POSTS: Record<string, BrandPost[]> = {
+  fk: [
+    { id: 'fk-p1', brandId: 'fk', title: 'Whose Order – Ep5: Cricket', contentType: 'Reel', platform: 'Instagram', date: '2026-04-08', reach: 950000, er: 1.45, likes: 9500, comments: 1150, shares: 210, saves: 3800, reel14dEr: 1.58, reel30dEr: 1.61 },
+    { id: 'fk-p2', brandId: 'fk', title: 'Whose Order – Ep4: Serial Aunty', contentType: 'Reel', platform: 'Instagram', date: '2026-04-01', reach: 850000, er: 1.20, likes: 7200, comments: 820, shares: 290, saves: 2700, reel14dEr: 1.31, reel30dEr: 1.35 },
+    { id: 'fk-p3', brandId: 'fk', title: 'IPL Predictions — 6 teams, 6 outcomes', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-15', reach: 720000, er: 0.95, likes: 5800, comments: 680, shares: 1100, saves: 2500 },
+    { id: 'fk-p4', brandId: 'fk', title: 'Samay Raina collab moment', contentType: 'Static', platform: 'Instagram', date: '2026-04-15', reach: 580000, er: 0.72, likes: 4200, comments: 480, shares: 800, saves: 1200 },
+    { id: 'fk-p5', brandId: 'fk', title: 'Siblings', contentType: 'Reel', platform: 'Instagram', date: '2026-04-15', reach: 520000, er: 0.68, likes: 3500, comments: 420, shares: 320, saves: 1100, reel14dEr: 0.74, reel30dEr: 0.76 },
+    { id: 'fk-p6', brandId: 'fk', title: 'April — something new', contentType: 'Static', platform: 'Instagram', date: '2026-04-01', reach: 320000, er: 0.42, likes: 1350, comments: 210, shares: 130, saves: 450 },
+    { id: 'fk-p7', brandId: 'fk', title: 'IPL tweet thread — best catches of the week', contentType: 'Tweet', platform: 'X', date: '2026-04-08', impressions: 46771, er: 2.20, likes: 580, shares: 289 },
+    { id: 'fk-p8', brandId: 'fk', title: 'KitKat Trend — break karo, Flipkart karo', contentType: 'Tweet', platform: 'X', date: '2026-04-08', impressions: 60969, er: 6.48, likes: 1820, shares: 289 },
+  ],
+  wakefit: [
+    { id: 'wk-p1', brandId: 'wakefit', title: '5 sleep positions and what they say about you', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-10', reach: 38000, er: 3.20, likes: 1215, comments: 140, shares: 95, saves: 870 },
+    { id: 'wk-p2', brandId: 'wakefit', title: 'Mattress science: why you wake up groggy', contentType: 'Reel', platform: 'Instagram', date: '2026-04-03', reach: 42000, er: 2.80, likes: 1175, comments: 156, shares: 89, saves: 750, reel14dEr: 3.10, reel30dEr: 3.24 },
+    { id: 'wk-p3', brandId: 'wakefit', title: 'Pillows ranked by sleep scientists', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-24', reach: 28000, er: 2.90, likes: 812, comments: 105, shares: 67, saves: 780 },
+    { id: 'wk-p4', brandId: 'wakefit', title: 'Morning routine that changed my sleep', contentType: 'Reel', platform: 'Instagram', date: '2026-04-17', reach: 35000, er: 2.50, likes: 875, comments: 120, shares: 78, saves: 610, reel14dEr: 2.65, reel30dEr: 2.71 },
+    { id: 'wk-p5', brandId: 'wakefit', title: 'World Sleep Day reminder', contentType: 'Static', platform: 'Instagram', date: '2026-04-19', reach: 18000, er: 1.20, likes: 216, comments: 48, shares: 32, saves: 220 },
+    { id: 'wk-p6', brandId: 'wakefit', title: 'New product: the zero-gravity pillow', contentType: 'Static', platform: 'Instagram', date: '2026-04-07', reach: 15000, er: 0.90, likes: 135, comments: 28, shares: 19, saves: 153 },
+  ],
+  tinder: [
+    { id: 'ti-p1', brandId: 'tinder', title: '5 texts you should never send on a first match', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-09', reach: 10500, er: 6.20, likes: 651, comments: 248, shares: 178, saves: 556 },
+    { id: 'ti-p2', brandId: 'tinder', title: 'Dating after 25 is actually better', contentType: 'Reel', platform: 'Instagram', date: '2026-04-02', reach: 12000, er: 5.80, likes: 695, comments: 290, shares: 140, saves: 572, reel14dEr: 6.30, reel30dEr: 6.45 },
+    { id: 'ti-p3', brandId: 'tinder', title: 'Dating red flags vs. green flags', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-10', reach: 9500, er: 4.80, likes: 456, comments: 156, shares: 89, saves: 455 },
+    { id: 'ti-p4', brandId: 'tinder', title: 'Things people lie about on dating apps', contentType: 'Reel', platform: 'Instagram', date: '2026-04-23', reach: 11000, er: 5.10, likes: 561, comments: 198, shares: 95, saves: 506, reel14dEr: 5.40 },
+    { id: 'ti-p5', brandId: 'tinder', title: 'Your vibe attracts your tribe', contentType: 'Static', platform: 'Instagram', date: '2026-04-16', reach: 8200, er: 3.40, likes: 278, comments: 88, shares: 52, saves: 142 },
+    { id: 'ti-p6', brandId: 'tinder', title: 'April Fools dating edition', contentType: 'Static', platform: 'Instagram', date: '2026-04-01', reach: 7200, er: 2.10, likes: 151, comments: 56, shares: 29, saves: 115 },
+  ],
+  epigamia: [
+    { id: 'ep-p1', brandId: 'epigamia', title: '5 ways to eat Epigamia without it tasting like health food', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-12', reach: 19500, er: 4.10, likes: 799, comments: 155, shares: 112, saves: 735 },
+    { id: 'ep-p2', brandId: 'epigamia', title: 'Greek yogurt at 3pm hits different', contentType: 'Reel', platform: 'Instagram', date: '2026-04-05', reach: 22000, er: 3.50, likes: 770, comments: 180, shares: 89, saves: 650, reel14dEr: 3.72, reel30dEr: 3.81 },
+    { id: 'ep-p3', brandId: 'epigamia', title: 'What a nutritionist actually eats for breakfast', contentType: 'Reel', platform: 'Instagram', date: '2026-04-25', reach: 20000, er: 3.20, likes: 640, comments: 145, shares: 78, saves: 617, reel14dEr: 3.38 },
+    { id: 'ep-p4', brandId: 'epigamia', title: 'Summer flavour drop', contentType: 'Static', platform: 'Instagram', date: '2026-04-18', reach: 16000, er: 2.80, likes: 448, comments: 98, shares: 65, saves: 448 },
+    { id: 'ep-p5', brandId: 'epigamia', title: 'Mango season is here', contentType: 'Static', platform: 'Instagram', date: '2026-04-06', reach: 14000, er: 2.10, likes: 294, comments: 75, shares: 42, saves: 295 },
+    { id: 'ep-p6', brandId: 'epigamia', title: 'Protein per 100g — know your yogurt', contentType: 'Static', platform: 'Instagram', date: '2026-04-20', reach: 12000, er: 1.50, likes: 180, comments: 43, shares: 28, saves: 189 },
+  ],
+  phonepe: [
+    { id: 'pp-p1', brandId: 'phonepe', title: 'KitKat Trend — scan, snap, sorted', contentType: 'Reel', platform: 'Instagram', date: '2026-04-08', reach: 62000, er: 2.80, likes: 1736, comments: 350, shares: 240, saves: 710, reel14dEr: 2.95, reel30dEr: 3.02 },
+    { id: 'pp-p2', brandId: 'phonepe', title: 'National Pet Day QRT', contentType: 'Reel', platform: 'Instagram', date: '2026-04-11', reach: 52000, er: 2.50, likes: 1300, comments: 240, shares: 180, saves: 600, reel14dEr: 2.62 },
+    { id: 'pp-p3', brandId: 'phonepe', title: 'DC V MI: pay like a champion', contentType: 'Reel', platform: 'Instagram', date: '2026-04-08', reach: 58000, er: 2.40, likes: 1392, comments: 280, shares: 198, saves: 614, reel14dEr: 2.51 },
+    { id: 'pp-p4', brandId: 'phonepe', title: 'National Pet Day: pets and payments', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-11', reach: 48000, er: 2.20, likes: 1056, comments: 215, shares: 156, saves: 529 },
+    { id: 'pp-p5', brandId: 'phonepe', title: 'Why UPI is the backbone of India', contentType: 'Static', platform: 'Instagram', date: '2026-04-22', reach: 35000, er: 1.80, likes: 630, comments: 135, shares: 89, saves: 378 },
+    { id: 'pp-p6', brandId: 'phonepe', title: 'Your payment, your privacy', contentType: 'Static', platform: 'Instagram', date: '2026-04-29', reach: 28000, er: 1.40, likes: 392, comments: 95, shares: 65, saves: 278 },
+  ],
+  league: [
+    { id: 'lg-p1', brandId: 'league', title: 'Culture audit: April round-up', contentType: 'Reel', platform: 'Instagram', date: '2026-04-25', reach: 9000, er: 4.80, likes: 432, comments: 168, shares: 75, saves: 357, reel14dEr: 5.10 },
+    { id: 'lg-p2', brandId: 'league', title: 'Why League is where culture meets commerce', contentType: 'Reel', platform: 'Instagram', date: '2026-04-04', reach: 8500, er: 4.20, likes: 357, comments: 145, shares: 62, saves: 289, reel14dEr: 4.44, reel30dEr: 4.51 },
+    { id: 'lg-p3', brandId: 'league', title: 'Brands doing social right in 2026', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-11', reach: 7200, er: 3.80, likes: 273, comments: 98, shares: 55, saves: 246 },
+    { id: 'lg-p4', brandId: 'league', title: 'Why storytelling beats selling', contentType: 'Static', platform: 'Instagram', date: '2026-04-07', reach: 6200, er: 3.10, likes: 192, comments: 72, shares: 38, saves: 143 },
+    { id: 'lg-p5', brandId: 'league', title: 'The League drop: April edition', contentType: 'Static', platform: 'Instagram', date: '2026-04-18', reach: 5800, er: 2.50, likes: 145, comments: 58, shares: 32, saves: 110 },
+    { id: 'lg-p6', brandId: 'league', title: 'April got us moving', contentType: 'Static', platform: 'Instagram', date: '2026-04-28', reach: 4800, er: 1.80, likes: 86, comments: 38, shares: 20, saves: 82 },
+  ],
+}
+
+// ===== Content type performance for April (monthly report) =====
+
+export const CONTENT_TYPE_STATS: Record<string, ContentTypeStat[]> = {
+  fk:       [
+    { contentType: 'Reel',     postCount: 3, avgEr: 1.11, bestPostTitle: 'Whose Order – Ep5: Cricket',        bestPostEr: 1.45 },
+    { contentType: 'Carousel', postCount: 1, avgEr: 0.95, bestPostTitle: 'IPL Predictions — 6 teams, 6 outcomes', bestPostEr: 0.95 },
+    { contentType: 'Static',   postCount: 2, avgEr: 0.57, bestPostTitle: 'Samay Raina collab moment',         bestPostEr: 0.72 },
+    { contentType: 'Tweet',    postCount: 2, avgEr: 4.34, bestPostTitle: 'KitKat Trend — break karo',         bestPostEr: 6.48 },
+  ],
+  wakefit:  [
+    { contentType: 'Reel',     postCount: 2, avgEr: 2.65, bestPostTitle: 'Mattress science: why you wake up groggy', bestPostEr: 2.80 },
+    { contentType: 'Carousel', postCount: 2, avgEr: 3.05, bestPostTitle: '5 sleep positions and what they say', bestPostEr: 3.20 },
+    { contentType: 'Static',   postCount: 2, avgEr: 1.05, bestPostTitle: 'World Sleep Day reminder',          bestPostEr: 1.20 },
+  ],
+  tinder:   [
+    { contentType: 'Reel',     postCount: 2, avgEr: 5.45, bestPostTitle: 'Dating after 25 is actually better', bestPostEr: 5.80 },
+    { contentType: 'Carousel', postCount: 2, avgEr: 5.50, bestPostTitle: '5 texts you should never send',     bestPostEr: 6.20 },
+    { contentType: 'Static',   postCount: 2, avgEr: 2.75, bestPostTitle: 'Your vibe attracts your tribe',     bestPostEr: 3.40 },
+  ],
+  epigamia: [
+    { contentType: 'Reel',     postCount: 2, avgEr: 3.35, bestPostTitle: 'Greek yogurt at 3pm hits different', bestPostEr: 3.50 },
+    { contentType: 'Carousel', postCount: 1, avgEr: 4.10, bestPostTitle: '5 ways to eat Epigamia without it tasting like health food', bestPostEr: 4.10 },
+    { contentType: 'Static',   postCount: 3, avgEr: 2.13, bestPostTitle: 'Summer flavour drop',               bestPostEr: 2.80 },
+  ],
+  phonepe:  [
+    { contentType: 'Reel',     postCount: 3, avgEr: 2.57, bestPostTitle: 'KitKat Trend — scan, snap, sorted', bestPostEr: 2.80 },
+    { contentType: 'Carousel', postCount: 1, avgEr: 2.20, bestPostTitle: 'National Pet Day: pets and payments', bestPostEr: 2.20 },
+    { contentType: 'Static',   postCount: 2, avgEr: 1.60, bestPostTitle: 'Why UPI is the backbone of India',  bestPostEr: 1.80 },
+  ],
+  league:   [
+    { contentType: 'Reel',     postCount: 2, avgEr: 4.50, bestPostTitle: 'Culture audit: April round-up',     bestPostEr: 4.80 },
+    { contentType: 'Carousel', postCount: 1, avgEr: 3.80, bestPostTitle: 'Brands doing social right in 2026', bestPostEr: 3.80 },
+    { contentType: 'Static',   postCount: 3, avgEr: 2.47, bestPostTitle: 'Why storytelling beats selling',    bestPostEr: 3.10 },
+  ],
+}
+
 // ===== Helpers =====
 export function getPersonById(id: string): Person | undefined {
   return PEOPLE.find((p) => p.id === id)
@@ -642,6 +772,59 @@ export function getAMNotesForBrand(brandId: string): AMNote[] {
 
 export function getWeeklyData(brandId: string): BrandWeeklyData | undefined {
   return WEEKLY_DATA.find((w) => w.brandId === brandId)
+}
+
+export function getBrandPosts(brandId: string): BrandPost[] {
+  return (BRAND_POSTS[brandId] ?? []).sort((a, b) => b.er - a.er)
+}
+
+export function getContentTypeStats(brandId: string): ContentTypeStat[] {
+  return CONTENT_TYPE_STATS[brandId] ?? []
+}
+
+// Derive brand health from last 3 non-null IG ER weeks
+export function getBrandHealth(brandId: string): { signal: HealthSignal; reason: string } {
+  const wd = WEEKLY_DATA.find((d) => d.brandId === brandId)
+  if (!wd) return { signal: 'amber', reason: 'No data' }
+  const ers = wd.instagram
+    .map((w, i) => ({ er: w?.engagementRate, i }))
+    .filter((x): x is { er: number; i: number } => x.er !== null && x.er !== undefined)
+  if (ers.length < 2) return { signal: 'amber', reason: 'Insufficient data' }
+  const last = ers[ers.length - 1].er
+  const prev = ers[ers.length - 2].er
+  const prev2 = ers.length >= 3 ? ers[ers.length - 3].er : null
+  if (last >= prev) return { signal: 'green', reason: `ER ${last.toFixed(2)}% — improving` }
+  if (prev2 !== null && last < prev && prev < prev2)
+    return { signal: 'red', reason: `ER declining 3+ weeks (${prev2.toFixed(2)} → ${prev.toFixed(2)} → ${last.toFixed(2)}%)` }
+  return { signal: 'amber', reason: `ER dipped to ${last.toFixed(2)}% from ${prev.toFixed(2)}%` }
+}
+
+// Aggregate weekly stats for a set of week indexes
+export function getWeekRangeStats(brandId: string, idxs: number[]) {
+  const wd = WEEKLY_DATA.find((d) => d.brandId === brandId)
+  if (!wd) return null
+  const igWeeks = idxs.map((i) => wd.instagram[i]).filter(Boolean) as InstagramWeek[]
+  const xWeeks  = wd.x ? idxs.map((i) => wd.x![i]).filter(Boolean) as XWeek[] : []
+
+  const reaches = igWeeks.map((w) => w.reach).filter((v): v is number => v !== null)
+  const ers     = igWeeks.map((w) => w.engagementRate).filter((v): v is number => v !== null)
+  const shares  = igWeeks.map((w) => w.shares).filter((v): v is number => v !== null)
+  const followers = igWeeks.map((w) => w.followersTotal).filter((v): v is number => v !== null && v !== undefined) as number[]
+
+  const xImps = xWeeks.map((w) => w.impressions).filter((v): v is number => v !== null)
+  const xErs  = xWeeks.map((w) => w.engagementRate).filter((v): v is number => v !== null)
+
+  return {
+    totalReach:   reaches.reduce((s, v) => s + v, 0),
+    avgReach:     reaches.length ? reaches.reduce((s, v) => s + v, 0) / reaches.length : 0,
+    avgEr:        ers.length ? ers.reduce((s, v) => s + v, 0) / ers.length : 0,
+    totalShares:  shares.reduce((s, v) => s + v, 0),
+    latestFollowers: followers[followers.length - 1] ?? null,
+    firstFollowers:  followers[0] ?? null,
+    weeksWithData: reaches.length,
+    xTotalImpressions: xImps.reduce((s, v) => s + v, 0),
+    xAvgEr: xErs.length ? xErs.reduce((s, v) => s + v, 0) / xErs.length : 0,
+  }
 }
 
 export function getBrandsForUser(userName: string, role: string): Brand[] {

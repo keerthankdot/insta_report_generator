@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Star } from 'lucide-react'
 import { Card } from '../../components/ui/Card'
 import { getCurrentUser } from '../../lib/auth'
-import { BRANDS, type ContentType, type Platform } from '../../lib/data'
+import { BRANDS, type ContentCategory, type ContentType, type Platform } from '../../lib/data'
 
 const CONTENT_TYPES: ContentType[] = ['Reel', 'Static', 'Carousel', 'Tweet']
 const PLATFORMS: Platform[] = ['Instagram', 'X', 'LinkedIn', 'YouTube']
