@@ -1,4 +1,4 @@
-export type Role = 'founder' | 'manager' | 'am' | 'creator'
+export type Role = 'admin' | 'manager' | 'am' | 'creator'
 
 export interface User {
   id: string
@@ -8,7 +8,7 @@ export interface User {
 }
 
 export const DEMO_USERS: User[] = [
-  { id: '1', email: 'viren@thenewthing.in', name: 'Viren Noronha', role: 'founder' },
+  { id: '1', email: 'viren@thenewthing.in', name: 'Viren Noronha', role: 'admin' },
   { id: '2', email: 'am@thenewthing.in', name: 'Rohan Mehta', role: 'am' },
   { id: '3', email: 'creative@thenewthing.in', name: 'Ananya Sharma', role: 'creator' },
 ]
@@ -31,7 +31,7 @@ export function login(email: string, password: string): User | null {
       id: 'guest',
       email: normalized || 'guest@thenewthing.in',
       name: 'Guest User',
-      role: 'founder',
+      role: 'admin',
     }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
   return user
@@ -59,7 +59,12 @@ export function getCurrentUser(): User | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    return JSON.parse(raw) as User
+    const user = JSON.parse(raw) as User
+    if ((user.role as string) === 'founder') {
+      user.role = 'admin'
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
+    }
+    return user
   } catch {
     return null
   }
@@ -73,7 +78,7 @@ export function switchRole(role: Role): void {
 }
 
 export const ROLE_LABELS: Record<Role, string> = {
-  founder: 'Founder',
+  admin: 'Admin',
   manager: 'Manager',
   am: 'Account Manager',
   creator: 'Creator',

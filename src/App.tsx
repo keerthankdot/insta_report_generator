@@ -4,13 +4,14 @@ import { getCurrentUser, type Role } from './lib/auth'
 import { Layout } from './components/layout/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-import FounderOS from './pages/founder/FounderOS'
+import AdminOS from './pages/founder/FounderOS'
 import PersonDetail from './pages/founder/PersonDetail'
 import AMDashboard from './pages/am/AMDashboard'
 import BrandDetail from './pages/am/BrandDetail'
 import CreativeBank from './pages/creative/CreativeBank'
 import AddEntry from './pages/creative/AddEntry'
 import MyBrands from './pages/MyBrands'
+import Profile from './pages/Profile'
 
 function ProtectedRoute({
   children,
@@ -45,7 +46,7 @@ export default function App() {
         }
       />
 
-      {/* My Brands — everyone */}
+      {/* My Brands everyone */}
       <Route
         path="/brands"
         element={
@@ -55,29 +56,29 @@ export default function App() {
         }
       />
 
-      {/* Founder OS — founder + manager only */}
+      {/* Admin admin + manager only */}
       <Route
         path="/founder"
         element={
-          <ProtectedRoute allowedRoles={['founder', 'manager']}>
-            <FounderOS />
+          <ProtectedRoute allowedRoles={['admin', 'manager']}>
+            <AdminOS />
           </ProtectedRoute>
         }
       />
       <Route
         path="/founder/:id"
         element={
-          <ProtectedRoute allowedRoles={['founder', 'manager']}>
+          <ProtectedRoute allowedRoles={['admin', 'manager']}>
             <PersonDetail />
           </ProtectedRoute>
         }
       />
 
-      {/* AM Tracker — founder, manager, am */}
+      {/* AM Tracker admin, manager, am */}
       <Route
         path="/am"
         element={
-          <ProtectedRoute allowedRoles={['founder', 'manager', 'am']}>
+          <ProtectedRoute allowedRoles={['admin', 'manager', 'am']}>
             <AMDashboard />
           </ProtectedRoute>
         }
@@ -85,17 +86,17 @@ export default function App() {
       <Route
         path="/am/:id"
         element={
-          <ProtectedRoute allowedRoles={['founder', 'manager', 'am', 'creator']}>
+          <ProtectedRoute allowedRoles={['admin', 'manager', 'am', 'creator']}>
             <BrandDetail />
           </ProtectedRoute>
         }
       />
 
-      {/* Creative Bank — everyone */}
+      {/* Creative Bank everyone */}
       <Route
         path="/creative"
         element={
-          <ProtectedRoute allowedRoles={['founder', 'manager', 'am', 'creator']}>
+          <ProtectedRoute allowedRoles={['admin', 'manager', 'am', 'creator']}>
             <CreativeBank />
           </ProtectedRoute>
         }
@@ -103,9 +104,18 @@ export default function App() {
       <Route
         path="/creative/new"
         element={
-          <ProtectedRoute allowedRoles={['founder', 'manager', 'am', 'creator']}>
+          <ProtectedRoute allowedRoles={['admin', 'manager', 'am', 'creator']}>
             <AddEntry />
           </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <AuthenticatedRoute>
+            <Profile />
+          </AuthenticatedRoute>
         }
       />
 

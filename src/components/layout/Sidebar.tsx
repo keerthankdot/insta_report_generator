@@ -6,7 +6,7 @@ import {
   Sparkles,
   LogOut,
   ChevronDown,
-  Layers,
+  UserCircle,
 } from 'lucide-react'
 import { useState } from 'react'
 import { logout, switchRole, type Role, type User, ROLE_LABELS } from '../../lib/auth'
@@ -18,18 +18,18 @@ interface NavItem {
 }
 
 const ALL_ITEMS: Record<string, NavItem> = {
-  Home: { label: 'Dashboard', to: '/', icon: Home },
-  'My Brands': { label: 'My Brands', to: '/brands', icon: Layers },
-  'Founder OS': { label: 'Founder OS', to: '/founder', icon: Users },
-  'AM Tracker': { label: 'AM Tracker', to: '/am', icon: BarChart3 },
-  'Creative Bank': { label: 'Creative Bank', to: '/creative', icon: Sparkles },
+  Home:            { label: 'Dashboard',    to: '/',         icon: Home       },
+  'Admin':    { label: 'Admin',   to: '/founder',  icon: Users      },
+  'My Brands':     { label: 'My Brands',    to: '/am',       icon: BarChart3  },
+  'Creative Bank': { label: 'Creative Bank',to: '/creative', icon: Sparkles   },
+  'Profile':       { label: 'Profile',      to: '/profile',  icon: UserCircle },
 }
 
 const SIDEBAR_ITEMS: Record<Role, string[]> = {
-  founder: ['Home', 'My Brands', 'Founder OS', 'AM Tracker', 'Creative Bank'],
-  manager: ['Home', 'My Brands', 'Founder OS', 'AM Tracker', 'Creative Bank'],
-  am: ['Home', 'My Brands', 'AM Tracker', 'Creative Bank'],
-  creator: ['Home', 'My Brands', 'Creative Bank'],
+  admin:   ['Home', 'My Brands', 'Creative Bank', 'Admin', 'Profile'],
+  manager: ['Home', 'My Brands', 'Creative Bank', 'Admin', 'Profile'],
+  am:      ['Home', 'My Brands', 'Creative Bank', 'Profile'],
+  creator: ['Home', 'My Brands', 'Creative Bank', 'Profile'],
 }
 
 interface SidebarProps {
@@ -58,17 +58,48 @@ export function Sidebar({ user, onRoleSwitch }: SidebarProps) {
     <aside
       className="fixed left-3 top-3 bottom-3 z-50 flex w-[220px] flex-col overflow-hidden rounded-2xl"
       style={{
-        background: 'rgba(28, 28, 30, 0.72)',
-        backdropFilter: 'blur(28px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(28px) saturate(180%)',
-        border: '1px solid rgba(255, 255, 255, 0.10)',
-        boxShadow: '0 8px 40px rgba(0,0,0,0.45)',
+        background: 'rgba(255,255,255,0.06)',
+        backdropFilter: 'blur(40px) saturate(200%)',
+        WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+        border: '1px solid rgba(255,255,255,0.14)',
+        boxShadow: '0 8px 40px rgba(0,0,0,0.25)',
       }}
     >
-      {/* Brand */}
-      <div className="px-5 pb-3 pt-6">
-        <div className="text-base font-semibold tracking-tight text-white">
-          TNT OS
+      {/* Brand + role switcher */}
+      <div className="px-4 pb-3 pt-5">
+        <div className="mb-3 text-center text-base font-semibold tracking-tight text-white">TNT OS</div>
+
+        {/* Role switcher */}
+        <div className="relative">
+          <button
+            onClick={() => setSwitcherOpen((s) => !s)}
+            className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-white/6 px-3 py-2 text-xs transition-colors hover:bg-white/10"
+          >
+            <div className="text-left">
+              <div className="text-[9px] font-semibold uppercase tracking-wider text-white/35">Viewing as</div>
+              <div className="font-medium text-white">{ROLE_LABELS[user.role]}</div>
+            </div>
+            <ChevronDown size={13} className={`text-white/40 transition-transform ${switcherOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {switcherOpen && (
+            <div
+              className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-white/10 shadow-2xl"
+              style={{ background: 'rgba(28,28,30,0.96)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+            >
+              {(['admin', 'manager', 'am', 'creator'] as Role[]).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => handleRoleSwitch(r)}
+                  className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-xs transition-colors hover:bg-white/5 ${
+                    user.role === r ? 'text-white' : 'text-white/50'
+                  }`}
+                >
+                  <span>{ROLE_LABELS[r]}</span>
+                  {user.role === r && <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -99,48 +130,11 @@ export function Sidebar({ user, onRoleSwitch }: SidebarProps) {
         </ul>
       </nav>
 
-      {/* User + role switcher */}
+      {/* Bottom: sign out */}
       <div className="border-t border-white/[0.07] p-3">
-        <div className="mb-2 px-2">
-          <div className="text-sm font-medium text-text-primary">{user.name}</div>
-          <div className="text-xs text-text-secondary">{ROLE_LABELS[user.role]}</div>
-        </div>
-
-        {/* DEMO role switcher */}
-        <div className="relative mb-2">
-          <button
-            onClick={() => setSwitcherOpen((s) => !s)}
-            className="flex w-full items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/15"
-          >
-            <span className="flex items-center gap-2">
-              <span className="rounded-sm bg-amber-500/30 px-1 py-px text-[9px] font-bold uppercase">
-                Demo
-              </span>
-              Switch role
-            </span>
-            <ChevronDown size={14} className={switcherOpen ? 'rotate-180' : ''} />
-          </button>
-          {switcherOpen && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 overflow-hidden rounded-lg border border-white/10 shadow-xl" style={{background:'rgba(30,30,32,0.92)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)'}}>
-              {(['founder', 'manager', 'am', 'creator'] as Role[]).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => handleRoleSwitch(r)}
-                  className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-white/5 ${
-                    user.role === r ? 'text-accent' : 'text-text-primary'
-                  }`}
-                >
-                  <span>{ROLE_LABELS[r]}</span>
-                  {user.role === r && <span className="text-[10px]">active</span>}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-white/40 transition-colors hover:bg-white/5 hover:text-white/70"
         >
           <LogOut size={14} />
           Sign out

@@ -22,7 +22,7 @@ const X_COLOR  = '#aaaaaa'
 type Tab = 'overview' | 'pulse' | 'monthly'
 
 function fmtOrDash(v: number | null | undefined, pct?: boolean): string {
-  if (v === null || v === undefined) return '—'
+  if (v === null || v === undefined) return '-'
   if (pct) return `${v.toFixed(2)}%`
   return formatNumber(v)
 }
@@ -166,18 +166,18 @@ export default function BrandDetail() {
       {tab === 'overview' && (
         <>
           <section className="mb-8">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">10-week summary — Instagram</h2>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">10-week summary, Instagram (Wed to Wed)</h2>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              <StatCard label="Avg Reach"   value={formatNumber(Math.round(summary.avgReach))} sub={`Total ${formatNumber(summary.avgReach * 8)}`} />
-              <StatCard label="Avg ER"      value={`${summary.avgEng.toFixed(2)}%`}            sub="across reported weeks" />
-              <StatCard label="Total Shares" value={formatNumber(summary.totalShares)}          sub="all weeks" />
-              <StatCard label="Peak Week"   value={formatNumber(summary.peakReach)}             sub={summary.peakWeek || 'n/a'} />
+              <StatCard label="Avg Reach"   value={formatNumber(Math.round(summary.avgReach))} />
+              <StatCard label="Avg ER"      value={`${summary.avgEng.toFixed(2)}%`}            />
+              <StatCard label="Total Shares" value={formatNumber(summary.totalShares)}          />
+              <StatCard label="Peak Week"   value={formatNumber(summary.peakReach)}             />
             </div>
           </section>
 
           <section className="mb-8">
             <Card>
-              <CardHeader title="Reach trend" subtitle={hasX ? '10 weeks · IG reach vs X impressions' : '10 weeks · IG reach'} />
+              <CardHeader title="Reach trend" subtitle={hasX ? '10 weeks Wed–Wed · IG reach vs X impressions' : '10 weeks Wed–Wed · IG reach'} />
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData}>
@@ -270,7 +270,7 @@ export default function BrandDetail() {
               </div>
             </section>
           ) : (
-            <Card><p className="text-sm text-white/40">No IG data for this week — check back next week.</p></Card>
+            <Card><p className="text-sm text-white/40">No IG data for this week. Check back next week..</p></Card>
           )}
 
           {/* Top post */}
@@ -284,7 +284,7 @@ export default function BrandDetail() {
           {/* Bottom post flag */}
           {pulseBottom && pulseBottom.id !== pulseTop?.id && (
             <section className="mb-6">
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">Lowest performer — flag</h2>
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">Lowest performer</h2>
               <PostRow post={pulseBottom} rank={igPosts.length} />
             </section>
           )}
@@ -346,7 +346,7 @@ export default function BrandDetail() {
                 />
                 <ScoreCard
                   label="Followers"
-                  value={monthlyStats.latestFollowers ? formatNumber(monthlyStats.latestFollowers) : '—'}
+                  value={monthlyStats.latestFollowers ? formatNumber(monthlyStats.latestFollowers) : '-'}
                   cur={monthlyStats.latestFollowers ?? 0}
                   prev={monthlyStats.firstFollowers ?? 0}
                 />
@@ -363,7 +363,7 @@ export default function BrandDetail() {
           {/* Weekly reach trend */}
           <section className="mb-8">
             <Card>
-              <CardHeader title="Week-over-week reach" subtitle={`${MONTHLY_PERIOD_LABEL} — Instagram`} />
+              <CardHeader title="Week-over-week reach" subtitle={`${MONTHLY_PERIOD_LABEL}, Instagram`} />
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={monthlyTrendData}>
@@ -381,7 +381,7 @@ export default function BrandDetail() {
           {/* Content type performance */}
           {ctStats.length > 0 && (
             <section className="mb-8">
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">Content type performance — April</h2>
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">Content type performance, April</h2>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader title="Avg ER by content type" subtitle="higher = better" />
@@ -430,17 +430,17 @@ export default function BrandDetail() {
           {/* Top 5 posts */}
           {top5.length > 0 && (
             <section className="mb-8">
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">Top 5 posts — by ER</h2>
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">Top 5 posts by ER</h2>
               <div className="space-y-2">
                 {top5.map((p, i) => <PostRow key={p.id} post={p} rank={i + 1} />)}
               </div>
             </section>
           )}
 
-          {/* Bottom 3 — internal */}
+          {/* Bottom 3 internal */}
           {bottom3.length > 0 && (
             <section className="mb-8">
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">Bottom 3 — internal only</h2>
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/35">Bottom 3 (internal only)</h2>
               <div className="space-y-2">
                 {bottom3.map((p, i) => <PostRow key={p.id} post={p} rank={igPosts.length - i} dim />)}
               </div>
@@ -457,7 +457,7 @@ export default function BrandDetail() {
                 <AMTextField label="Next month focus" placeholder="What will we test, retire, or double down on next month?" />
               </div>
               <div className="mt-5 flex items-center justify-between border-t border-white/8 pt-4">
-                <p className="text-xs text-white/30">Internal — not client-facing until exported</p>
+                <p className="text-xs text-white/30">Internal. Not client-facing until exported.</p>
                 <button className="rounded-xl border border-white/15 bg-white/8 px-4 py-2 text-xs font-medium text-white hover:bg-white/12">Save report</button>
               </div>
             </Card>

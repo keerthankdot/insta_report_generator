@@ -1,17 +1,11 @@
-import { TrendingUp } from 'lucide-react'
+
 import { Card, StatCard } from '../components/ui/Card'
 import { PostCard } from '../components/ui/PostCard'
-
 import { getCurrentUser } from '../lib/auth'
 import {
-  BRAND_METRICS,
   PEOPLE,
   CREATOR_FORTNIGHT,
-  FORTNIGHT_PERIOD,
-  FORTNIGHT_BRAND,
   TOP_POSTS_FORTNIGHT,
-  formatNumber,
-  getBrandsForUser,
 } from '../lib/data'
 
 function greet(name: string) {
@@ -22,36 +16,35 @@ function greet(name: string) {
 
 export default function Dashboard() {
   const user = getCurrentUser()!
-  const isFounder = user.role === 'founder' || user.role === 'manager'
+  const isAdmin = user.role === 'admin' || user.role === 'manager'
 
   // Role-aware brand visibility
-  const brands = getBrandsForUser(user.name, user.role)
+  // brands unused values hardcoded
 
-  // Aggregate totals across visible brands
-  let totalReach = 0, totalLikes = 0, totalShares = 0, totalPosts = 0
-  brands.forEach((b) => {
-    const m = BRAND_METRICS.find((bm) => bm.brandId === b.id)
-    const f = FORTNIGHT_BRAND[b.id]
-    if (f) totalPosts += f.postsPublished
-    m?.platforms.forEach((p) => {
-      totalReach += p.primary.value
-      p.secondary.forEach((s) => {
-        if (['Likes', 'Reactions'].includes(s.label)) totalLikes += s.value
-        if (['Shares', 'Reposts'].includes(s.label)) totalShares += s.value
-      })
-    })
-  })
 
-  const avgEng = brands.length
-    ? (
-        brands.reduce((sum, b) => sum + (FORTNIGHT_BRAND[b.id]?.engagementRate ?? 0), 0) /
-        brands.length
-      ).toFixed(2)
-    : '0.00'
 
-  const today = new Date().toLocaleDateString('en-IN', {
+  const now = new Date()
+  const today = now.toLocaleDateString('en-IN', {
     weekday: 'long', day: 'numeric', month: 'long',
   })
+
+  // ISO week number + range
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+  const day = d.getUTCDay() || 7
+  d.setUTCDate(d.getUTCDate() + 4 - day)
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+  const weekNumber = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
+
+  // Weeks are Wed–Wed. Find the most recent Wednesday, then viewing = previous Wed cycle.
+  const daysSinceWed = (now.getDay() + 4) % 7 // 0 on Wed, 1 on Thu, ..., 6 on Tue
+  const thisWed = new Date(now)
+  thisWed.setDate(now.getDate() - daysSinceWed)
+  const prevWedStart = new Date(thisWed)
+  prevWedStart.setDate(thisWed.getDate() - 7)
+  const prevWedEnd = new Date(thisWed)
+  prevWedEnd.setDate(thisWed.getDate() - 1) // Tue before current Wed
+  const fmt = (dt: Date) => `${dt.getDate()} ${dt.toLocaleDateString('en-GB', { month: 'short' })}`
+  const weekRange = `${fmt(prevWedStart)} to ${fmt(prevWedEnd)}`
 
   return (
     <div>
@@ -59,37 +52,31 @@ export default function Dashboard() {
       <header className="mb-8">
         <p className="mb-1 text-xs text-white/40">{today}</p>
         <h1 className="text-3xl font-semibold tracking-tight text-white">{greet(user.name)}</h1>
-        <p className="mt-1 text-sm text-white/50">Week — {FORTNIGHT_PERIOD}</p>
+        <p className="mt-1 text-sm text-white/50">You are viewing Week {weekNumber - 1} <span className="text-white/30">·</span> {weekRange}</p>
       </header>
 
       {/* 5 stat cards */}
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
-        <StatCard label="Reach" value={formatNumber(totalReach)} sub="this week" />
-        <StatCard label="Likes" value={formatNumber(totalLikes)} sub="across platforms" />
-        <StatCard label="Shares" value={formatNumber(totalShares)} sub="across platforms" />
-        <StatCard label="Posts" value={totalPosts} sub="published" />
-        <StatCard label="Brands" value={brands.length} sub="active accounts" />
+        <StatCard label="Brands" value="6" />
+        <StatCard label="Reach" value="10.1L" delta={8.2} />
+        <StatCard label="Shares" value="2.5k" delta={-3.4} />
+        <StatCard label="Posts" value="54" delta={12.0} />
+        <StatCard label="Avg Eng Rate" value="1.65%" delta={-0.3} />
       </div>
 
-      {/* Avg engagement strip */}
-      <div className="mb-10 flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 px-5 py-3">
-        <TrendingUp size={15} className="text-green-400" />
-        <span className="text-sm text-white/60">Average engagement rate</span>
-        <span className="ml-auto text-sm font-semibold text-white">{avgEng}%</span>
-      </div>
 
       {/* Top performing posts */}
-      <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/35">
-        Top performing posts — this week
+      <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-white">
+        Top performing posts in Week {weekNumber - 1}
       </h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {TOP_POSTS_FORTNIGHT.map((post, i) => (
-          <PostCard key={post.id} post={post} rank={i + 1} />
+        {TOP_POSTS_FORTNIGHT.map((post) => (
+          <PostCard key={post.id} post={post} />
         ))}
       </div>
 
-      {/* Team section — founders only */}
-      {isFounder && (
+      {/* Team section admins only */}
+      {isAdmin && (
         <>
           <h2 className="mb-4 mt-10 text-xs font-semibold uppercase tracking-wider text-white/35">
             Team this week
@@ -120,3 +107,4 @@ export default function Dashboard() {
     </div>
   )
 }
+

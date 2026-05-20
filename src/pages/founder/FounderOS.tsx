@@ -7,7 +7,7 @@ import { PEOPLE, type Trajectory } from '../../lib/data'
 
 const SORT_ORDER: Trajectory[] = ['Needs Attention', 'Rising', 'Steady', 'New']
 
-export default function FounderOS() {
+export default function AdminOS() {
   const [sortBy, setSortBy] = useState<'trajectory' | 'name'>('trajectory')
   const [query, setQuery] = useState('')
 
@@ -28,7 +28,7 @@ export default function FounderOS() {
     <div>
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight text-text-primary">
-          Founder OS
+          Admin
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
           Your team at a glance. Click anyone to see their trajectory and 1:1 prep.
@@ -60,7 +60,7 @@ export default function FounderOS() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {sorted.map((person) => (
-          <Link key={person.id} to={`/founder/${person.id}`}>
+          <Link key={person.id} to={`/admin/${person.id}`}>
             <Card hover>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">

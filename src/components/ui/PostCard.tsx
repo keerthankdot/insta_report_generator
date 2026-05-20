@@ -1,13 +1,21 @@
 import { useMicrolinkImage } from '../../hooks/useMicrolinkImage'
-import { PlatformBadge } from './Badge'
 import { formatNumber, type TopPost } from '../../lib/data'
 
-export function PostCard({ post, rank }: { post: TopPost; rank: number }) {
+export function PostCard({ post }: { post: TopPost }) {
   const { imageUrl, loading } = useMicrolinkImage(post.url)
 
+  const Wrapper = post.url
+    ? ({ children }: { children: React.ReactNode }) => (
+        <a href={post.url} target="_blank" rel="noopener noreferrer" className="block">
+          {children}
+        </a>
+      )
+    : ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+
   return (
+    <Wrapper>
     <div
-      className="flex w-full overflow-hidden rounded-2xl border border-white/8"
+      className={`flex w-full overflow-hidden rounded-2xl border border-white/8 ${post.url ? 'cursor-pointer hover:border-white/20 transition-all' : ''}`}
       style={{ background: 'rgba(255,255,255,0.04)', aspectRatio: '16/9' }}
     >
       {/* 4:5 image area */}
@@ -31,52 +39,39 @@ export function PostCard({ post, rank }: { post: TopPost; rank: number }) {
           </div>
         )}
 
-        {/* rank */}
-        <div className="absolute left-2.5 top-2.5 flex h-6 w-6 items-center justify-center rounded-full border border-white/15 bg-black/40 text-[10px] font-semibold text-white/70 backdrop-blur-sm">
-          {rank}
-        </div>
 
-        {/* platform badge */}
-        <div className="absolute right-2 top-2">
-          <PlatformBadge platform={post.platform} />
-        </div>
-
-        {/* caption gradient overlay */}
-        <div
-          className="absolute bottom-0 left-0 right-0 p-2.5"
-          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.80) 0%, transparent 100%)' }}
-        >
-          <p className="line-clamp-2 text-[11px] leading-snug text-white">{post.caption}</p>
-        </div>
       </div>
 
       {/* stats panel */}
       <div className="flex min-w-0 flex-1 flex-col justify-between p-3">
-        <div>
-          <div className="text-xs font-medium text-white/60">{post.brand}</div>
-          <div className="mt-0.5 text-[10px] text-white/30">{post.date}</div>
+        <div className="flex items-start justify-between gap-2">
+          <div className="text-sm font-semibold text-white">{post.brand}</div>
+          <div className="text-[10px] text-white flex-shrink-0">
+            {new Date(post.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
+          </div>
         </div>
         <div>
           <div className="mb-2">
-            <span className="text-xl font-bold text-white">{post.engagementRate}%</span>
-            <span className="ml-1 text-[10px] text-white/35">eng rate</span>
+            <span className="text-2xl font-bold text-white">{post.engagementRate}%</span>
+            <span className="ml-1 text-xs text-white/35">eng rate</span>
           </div>
-          <div className="space-y-1 text-[11px]">
+          <div className="space-y-1 text-xs">
             <div>
-              <span className="font-medium text-white">{formatNumber(post.reach)}</span>
+              <span className="font-semibold text-white">{formatNumber(post.reach)}</span>
               <span className="ml-1 text-white/35">reach</span>
             </div>
             <div>
-              <span className="font-medium text-white">{formatNumber(post.likes)}</span>
+              <span className="font-semibold text-white">{formatNumber(post.likes)}</span>
               <span className="ml-1 text-white/35">likes</span>
             </div>
             <div>
-              <span className="font-medium text-white">{formatNumber(post.shares)}</span>
+              <span className="font-semibold text-white">{formatNumber(post.shares)}</span>
               <span className="ml-1 text-white/35">shares</span>
             </div>
           </div>
         </div>
       </div>
     </div>
+    </Wrapper>
   )
 }

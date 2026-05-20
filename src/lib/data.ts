@@ -33,6 +33,7 @@ export interface Brand {
   status: 'active' | 'paused' | 'attention'
   color: string
   creatorNames: string[]
+  logoDomain?: string
 }
 
 export interface PlatformMetrics {
@@ -185,7 +186,7 @@ export const NOTES: Note[] = [
     personId: 'p2',
     date: '2026-04-10',
     type: 'Observation',
-    content: 'Holding FK and Tinder accounts steady. No fires, no breakouts. Time for a stretch project.',
+    content: 'Holding Flipkart and Tinder accounts steady. No fires, no breakouts. Time for a stretch project.',
     urgency: 'Low',
     authorName: 'Viren Noronha',
   },
@@ -233,8 +234,8 @@ export const NOTES: Note[] = [
 // ===== Brands =====
 export const BRANDS: Brand[] = [
   {
-    id: 'fk',
-    name: 'FK',
+    id: 'fk', logoDomain: 'flipkart.com',
+    name: 'Flipkart',
     amName: 'Rohan Mehta',
     platforms: ['Instagram', 'X'],
     status: 'active',
@@ -242,7 +243,7 @@ export const BRANDS: Brand[] = [
     creatorNames: ['Shraddha', 'Hari', 'Anand'],
   },
   {
-    id: 'wakefit',
+    id: 'wakefit', logoDomain: 'wakefit.co',
     name: 'Wakefit',
     amName: 'Shreya Patel',
     platforms: ['Instagram'],
@@ -251,7 +252,7 @@ export const BRANDS: Brand[] = [
     creatorNames: ['Vedant', 'Stuti'],
   },
   {
-    id: 'tinder',
+    id: 'tinder', logoDomain: 'tinder.com',
     name: 'Tinder India',
     amName: 'Rohan Mehta',
     platforms: ['Instagram'],
@@ -260,7 +261,7 @@ export const BRANDS: Brand[] = [
     creatorNames: ['Manisha', 'Jonathan'],
   },
   {
-    id: 'epigamia',
+    id: 'epigamia', logoDomain: 'epigamia.com',
     name: 'Epigamia',
     amName: 'Shreya Patel',
     platforms: ['Instagram'],
@@ -269,7 +270,7 @@ export const BRANDS: Brand[] = [
     creatorNames: ['Mahek', 'Shreya'],
   },
   {
-    id: 'phonepe',
+    id: 'phonepe', logoDomain: 'phonepe.com',
     name: 'PhonePe',
     amName: 'Shreya Patel',
     platforms: ['Instagram'],
@@ -278,13 +279,22 @@ export const BRANDS: Brand[] = [
     creatorNames: ['Shraddha', 'Jishnu', 'Shruti'],
   },
   {
-    id: 'league',
+    id: 'league', logoDomain: 'league.com',
     name: 'League',
     amName: 'Rohan Mehta',
     platforms: ['Instagram', 'X'],
     status: 'attention',
     color: '#10B981',
     creatorNames: ['Niveditha', 'Hari'],
+  },
+  {
+    id: 'fkminutes', logoDomain: 'flipkart.com',
+    name: 'Flipkart Minutes',
+    amName: 'Rohan Mehta',
+    platforms: ['Instagram'],
+    status: 'active',
+    color: '#F59E0B',
+    creatorNames: ['Anand', 'Stuti'],
   },
 ]
 
@@ -294,7 +304,7 @@ export const WEEKLY_DATA: BrandWeeklyData[] = [
   {
     brandId: 'fk',
     instagram: [
-      { reach: 736356, engagementRate: 0.75, shares: 493, followersTotal: 9200000 },
+      { reach: 736356, engagementRate: 0.75, shares: 493, followersDelta: 670, followersTotal: 9200000 },
       { reach: 729557, engagementRate: 0.85, shares: 507, followersTotal: 9603000 },
       { reach: 757226, engagementRate: 0.97, shares: 324, followersTotal: 9836000 },
       { reach: 903028, engagementRate: 0.86, shares: 393, followersTotal: 10000000 },
@@ -408,6 +418,13 @@ export const WEEKLY_DATA: BrandWeeklyData[] = [
       { impressions: 0, engagementRate: null, reposts: 0, followersTotal: 58200 },
       null,
       null,
+    ],
+  },
+  // Flipkart Minutes
+  {
+    brandId: 'fkminutes',
+    instagram: [
+      null, null, null, null, null, null, null, null, null, null,
     ],
   },
 ]
@@ -547,7 +564,7 @@ export const CREATIVE_ENTRIES: CreativeEntry[] = [
     contentType: 'Static',
     category: 'Trend',
     platform: 'Instagram',
-    brand: 'FK',
+    brand: 'Flipkart',
     title: 'Met Gala | If the theme was art, why did no one dress like"',
     liveLink: 'https://www.instagram.com/p/example1',
     insight: "We've all made the classic 2 hills, one house drawing in art class as kids",
@@ -555,7 +572,7 @@ export const CREATIVE_ENTRIES: CreativeEntry[] = [
     shares: 273,
     benchmarkMet: true,
     selfRating: 3,
-    explainRating: 'The nostalgic insight — which would make you want to comment about your school experience',
+    explainRating: 'The nostalgic insight which would make you want to comment about your school experience',
     whatIdChange: "I'd post it within hours of the event",
     creatorName: 'Shraddha',
     dateAdded: '2026-05-08',
@@ -565,7 +582,7 @@ export const CREATIVE_ENTRIES: CreativeEntry[] = [
     contentType: 'Static',
     category: 'Trend',
     platform: 'Instagram',
-    brand: 'FK',
+    brand: 'Flipkart',
     title: "Met Gala | Where's my invite",
     liveLink: 'https://www.instagram.com/p/example2',
     insight: "Isha Ambani wore a mango bag to the red carpet",
@@ -600,7 +617,7 @@ export const CREATIVE_ENTRIES: CreativeEntry[] = [
     contentType: 'Tweet',
     category: 'Humour',
     platform: 'X',
-    brand: 'FK',
+    brand: 'Flipkart',
     title: 'Chat is this a bhagona or tapeli?',
     liveLink: 'https://x.com/example4',
     insight: 'This vessel has different names in different households',
@@ -609,7 +626,7 @@ export const CREATIVE_ENTRIES: CreativeEntry[] = [
     benchmarkMet: false,
     selfRating: 3,
     explainRating: '-',
-    whatIdChange: 'We need to seed responses in the first few hours of posting to get the momentum going — maybe even get some brand banter involved.',
+    whatIdChange: 'We need to seed responses in the first few hours of posting to get the momentum going maybe even get some brand banter involved.',
     creatorName: 'Shraddha',
     dateAdded: '2026-05-12',
   },
@@ -658,14 +675,20 @@ export const PREV_MONTH_WEEK_IDXS = [0, 1, 2]       // Mar 11, 18, 25
 
 export const BRAND_POSTS: Record<string, BrandPost[]> = {
   fk: [
-    { id: 'fk-p1', brandId: 'fk', title: 'Whose Order – Ep5: Cricket', contentType: 'Reel', platform: 'Instagram', date: '2026-04-08', reach: 950000, er: 1.45, likes: 9500, comments: 1150, shares: 210, saves: 3800, reel14dEr: 1.58, reel30dEr: 1.61 },
+    // Mar 11 week (Wed–Wed)
+    { id: 'fk-m1', brandId: 'fk', title: 'Whose Order – Ep 1: Dog', contentType: 'Reel', platform: 'Instagram', date: '2026-03-11', reach: 400000, er: 0.82, likes: 3280, comments: 410, shares: 260, saves: 1340, url: 'https://www.instagram.com/reels/DVlRv2Ik1Vp/' },
+    { id: 'fk-m2', brandId: 'fk', title: "POV: Teachers' 'Important Discussion' during Exam invigilation", contentType: 'Reel', platform: 'Instagram', date: '2026-03-11', reach: 336356, er: 0.68, likes: 2287, comments: 290, shares: 233, saves: 478 },
+    { id: 'fk-m3', brandId: 'fk', title: 'Holi', contentType: 'Tweet', platform: 'X', date: '2026-03-11', impressions: 9500, er: 3.10, likes: 185, shares: 9 },
+    { id: 'fk-m4', brandId: 'fk', title: 'IndvsEng Semi Finals', contentType: 'Tweet', platform: 'X', date: '2026-03-13', impressions: 8200, er: 2.60, likes: 142, shares: 8 },
+    { id: 'fk-m5', brandId: 'fk', title: 'WC Finals', contentType: 'Tweet', platform: 'X', date: '2026-03-15', impressions: 8175, er: 2.40, likes: 129, shares: 8 },
+    // Apr posts title: 'Whose Order – Ep5: Cricket', contentType: 'Reel', platform: 'Instagram', date: '2026-04-08', reach: 950000, er: 1.45, likes: 9500, comments: 1150, shares: 210, saves: 3800, reel14dEr: 1.58, reel30dEr: 1.61 },
     { id: 'fk-p2', brandId: 'fk', title: 'Whose Order – Ep4: Serial Aunty', contentType: 'Reel', platform: 'Instagram', date: '2026-04-01', reach: 850000, er: 1.20, likes: 7200, comments: 820, shares: 290, saves: 2700, reel14dEr: 1.31, reel30dEr: 1.35 },
-    { id: 'fk-p3', brandId: 'fk', title: 'IPL Predictions — 6 teams, 6 outcomes', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-15', reach: 720000, er: 0.95, likes: 5800, comments: 680, shares: 1100, saves: 2500 },
+    { id: 'fk-p3', brandId: 'fk', title: 'IPL Predictions 6 teams, 6 outcomes', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-15', reach: 720000, er: 0.95, likes: 5800, comments: 680, shares: 1100, saves: 2500 },
     { id: 'fk-p4', brandId: 'fk', title: 'Samay Raina collab moment', contentType: 'Static', platform: 'Instagram', date: '2026-04-15', reach: 580000, er: 0.72, likes: 4200, comments: 480, shares: 800, saves: 1200 },
     { id: 'fk-p5', brandId: 'fk', title: 'Siblings', contentType: 'Reel', platform: 'Instagram', date: '2026-04-15', reach: 520000, er: 0.68, likes: 3500, comments: 420, shares: 320, saves: 1100, reel14dEr: 0.74, reel30dEr: 0.76 },
-    { id: 'fk-p6', brandId: 'fk', title: 'April — something new', contentType: 'Static', platform: 'Instagram', date: '2026-04-01', reach: 320000, er: 0.42, likes: 1350, comments: 210, shares: 130, saves: 450 },
-    { id: 'fk-p7', brandId: 'fk', title: 'IPL tweet thread — best catches of the week', contentType: 'Tweet', platform: 'X', date: '2026-04-08', impressions: 46771, er: 2.20, likes: 580, shares: 289 },
-    { id: 'fk-p8', brandId: 'fk', title: 'KitKat Trend — break karo, Flipkart karo', contentType: 'Tweet', platform: 'X', date: '2026-04-08', impressions: 60969, er: 6.48, likes: 1820, shares: 289 },
+    { id: 'fk-p6', brandId: 'fk', title: 'April something new', contentType: 'Static', platform: 'Instagram', date: '2026-04-01', reach: 320000, er: 0.42, likes: 1350, comments: 210, shares: 130, saves: 450 },
+    { id: 'fk-p7', brandId: 'fk', title: 'IPL tweet thread best catches of the week', contentType: 'Tweet', platform: 'X', date: '2026-04-08', impressions: 46771, er: 2.20, likes: 580, shares: 289 },
+    { id: 'fk-p8', brandId: 'fk', title: 'KitKat Trend break karo, Flipkart karo', contentType: 'Tweet', platform: 'X', date: '2026-04-08', impressions: 60969, er: 6.48, likes: 1820, shares: 289 },
   ],
   wakefit: [
     { id: 'wk-p1', brandId: 'wakefit', title: '5 sleep positions and what they say about you', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-10', reach: 38000, er: 3.20, likes: 1215, comments: 140, shares: 95, saves: 870 },
@@ -689,10 +712,10 @@ export const BRAND_POSTS: Record<string, BrandPost[]> = {
     { id: 'ep-p3', brandId: 'epigamia', title: 'What a nutritionist actually eats for breakfast', contentType: 'Reel', platform: 'Instagram', date: '2026-04-25', reach: 20000, er: 3.20, likes: 640, comments: 145, shares: 78, saves: 617, reel14dEr: 3.38 },
     { id: 'ep-p4', brandId: 'epigamia', title: 'Summer flavour drop', contentType: 'Static', platform: 'Instagram', date: '2026-04-18', reach: 16000, er: 2.80, likes: 448, comments: 98, shares: 65, saves: 448 },
     { id: 'ep-p5', brandId: 'epigamia', title: 'Mango season is here', contentType: 'Static', platform: 'Instagram', date: '2026-04-06', reach: 14000, er: 2.10, likes: 294, comments: 75, shares: 42, saves: 295 },
-    { id: 'ep-p6', brandId: 'epigamia', title: 'Protein per 100g — know your yogurt', contentType: 'Static', platform: 'Instagram', date: '2026-04-20', reach: 12000, er: 1.50, likes: 180, comments: 43, shares: 28, saves: 189 },
+    { id: 'ep-p6', brandId: 'epigamia', title: 'Protein per 100g know your yogurt', contentType: 'Static', platform: 'Instagram', date: '2026-04-20', reach: 12000, er: 1.50, likes: 180, comments: 43, shares: 28, saves: 189 },
   ],
   phonepe: [
-    { id: 'pp-p1', brandId: 'phonepe', title: 'KitKat Trend — scan, snap, sorted', contentType: 'Reel', platform: 'Instagram', date: '2026-04-08', reach: 62000, er: 2.80, likes: 1736, comments: 350, shares: 240, saves: 710, reel14dEr: 2.95, reel30dEr: 3.02 },
+    { id: 'pp-p1', brandId: 'phonepe', title: 'KitKat Trend scan, snap, sorted', contentType: 'Reel', platform: 'Instagram', date: '2026-04-08', reach: 62000, er: 2.80, likes: 1736, comments: 350, shares: 240, saves: 710, reel14dEr: 2.95, reel30dEr: 3.02 },
     { id: 'pp-p2', brandId: 'phonepe', title: 'National Pet Day QRT', contentType: 'Reel', platform: 'Instagram', date: '2026-04-11', reach: 52000, er: 2.50, likes: 1300, comments: 240, shares: 180, saves: 600, reel14dEr: 2.62 },
     { id: 'pp-p3', brandId: 'phonepe', title: 'DC V MI: pay like a champion', contentType: 'Reel', platform: 'Instagram', date: '2026-04-08', reach: 58000, er: 2.40, likes: 1392, comments: 280, shares: 198, saves: 614, reel14dEr: 2.51 },
     { id: 'pp-p4', brandId: 'phonepe', title: 'National Pet Day: pets and payments', contentType: 'Carousel', platform: 'Instagram', date: '2026-04-11', reach: 48000, er: 2.20, likes: 1056, comments: 215, shares: 156, saves: 529 },
@@ -714,9 +737,9 @@ export const BRAND_POSTS: Record<string, BrandPost[]> = {
 export const CONTENT_TYPE_STATS: Record<string, ContentTypeStat[]> = {
   fk:       [
     { contentType: 'Reel',     postCount: 3, avgEr: 1.11, bestPostTitle: 'Whose Order – Ep5: Cricket',        bestPostEr: 1.45 },
-    { contentType: 'Carousel', postCount: 1, avgEr: 0.95, bestPostTitle: 'IPL Predictions — 6 teams, 6 outcomes', bestPostEr: 0.95 },
+    { contentType: 'Carousel', postCount: 1, avgEr: 0.95, bestPostTitle: 'IPL Predictions 6 teams, 6 outcomes', bestPostEr: 0.95 },
     { contentType: 'Static',   postCount: 2, avgEr: 0.57, bestPostTitle: 'Samay Raina collab moment',         bestPostEr: 0.72 },
-    { contentType: 'Tweet',    postCount: 2, avgEr: 4.34, bestPostTitle: 'KitKat Trend — break karo',         bestPostEr: 6.48 },
+    { contentType: 'Tweet',    postCount: 2, avgEr: 4.34, bestPostTitle: 'KitKat Trend break karo',         bestPostEr: 6.48 },
   ],
   wakefit:  [
     { contentType: 'Reel',     postCount: 2, avgEr: 2.65, bestPostTitle: 'Mattress science: why you wake up groggy', bestPostEr: 2.80 },
@@ -734,10 +757,11 @@ export const CONTENT_TYPE_STATS: Record<string, ContentTypeStat[]> = {
     { contentType: 'Static',   postCount: 3, avgEr: 2.13, bestPostTitle: 'Summer flavour drop',               bestPostEr: 2.80 },
   ],
   phonepe:  [
-    { contentType: 'Reel',     postCount: 3, avgEr: 2.57, bestPostTitle: 'KitKat Trend — scan, snap, sorted', bestPostEr: 2.80 },
+    { contentType: 'Reel',     postCount: 3, avgEr: 2.57, bestPostTitle: 'KitKat Trend scan, snap, sorted', bestPostEr: 2.80 },
     { contentType: 'Carousel', postCount: 1, avgEr: 2.20, bestPostTitle: 'National Pet Day: pets and payments', bestPostEr: 2.20 },
     { contentType: 'Static',   postCount: 2, avgEr: 1.60, bestPostTitle: 'Why UPI is the backbone of India',  bestPostEr: 1.80 },
   ],
+  fkminutes: [],
   league:   [
     { contentType: 'Reel',     postCount: 2, avgEr: 4.50, bestPostTitle: 'Culture audit: April round-up',     bestPostEr: 4.80 },
     { contentType: 'Carousel', postCount: 1, avgEr: 3.80, bestPostTitle: 'Brands doing social right in 2026', bestPostEr: 3.80 },
@@ -793,7 +817,7 @@ export function getBrandHealth(brandId: string): { signal: HealthSignal; reason:
   const last = ers[ers.length - 1].er
   const prev = ers[ers.length - 2].er
   const prev2 = ers.length >= 3 ? ers[ers.length - 3].er : null
-  if (last >= prev) return { signal: 'green', reason: `ER ${last.toFixed(2)}% — improving` }
+  if (last >= prev) return { signal: 'green', reason: `ER ${last.toFixed(2)}%: improving` }
   if (prev2 !== null && last < prev && prev < prev2)
     return { signal: 'red', reason: `ER declining 3+ weeks (${prev2.toFixed(2)} → ${prev.toFixed(2)} → ${last.toFixed(2)}%)` }
   return { signal: 'amber', reason: `ER dipped to ${last.toFixed(2)}% from ${prev.toFixed(2)}%` }
@@ -828,7 +852,7 @@ export function getWeekRangeStats(brandId: string, idxs: number[]) {
 }
 
 export function getBrandsForUser(userName: string, role: string): Brand[] {
-  if (role === 'founder' || role === 'manager') return BRANDS
+  if (role === 'admin' || role === 'manager') return BRANDS
   if (role === 'am') {
     const own = BRANDS.filter((b) => b.amName === userName)
     return own.length ? own : BRANDS
@@ -900,7 +924,7 @@ export const FORTNIGHT_BRAND: Record<string, {
   engagementRate: number
 }> = Object.fromEntries(BRANDS.map((b) => [b.id, deriveFortnightForBrand(b.id)]))
 
-// Aggregated totals across all brands for founder view
+// Aggregated totals across all brands for admin view
 export const AGENCY_FORTNIGHT = {
   totalReach: BRANDS.reduce((sum, b) => {
     const wd = WEEKLY_DATA.find((d) => d.brandId === b.id)
@@ -963,9 +987,9 @@ export interface TopPost {
 export const TOP_POSTS_FORTNIGHT: TopPost[] = [
   {
     id: 'tp1',
-    brand: 'FK',
+    brand: 'Flipkart',
     platform: 'Instagram',
-    caption: '"Friendly hai. Kaatega nahi." — Whose Order Is It Anyway, Ep 1',
+    caption: '"Friendly hai. Kaatega nahi." Whose Order Is It Anyway, Ep 1',
     reach: 774639,
     likes: 5650,
     shares: 944,
@@ -977,7 +1001,7 @@ export const TOP_POSTS_FORTNIGHT: TopPost[] = [
     id: 'tp2',
     brand: 'Tinder India',
     platform: 'Instagram',
-    caption: 'Dating after 25 hits different — carousel series part 3',
+    caption: 'Dating after 25 hits different carousel series part 3',
     reach: 12086,
     likes: 665,
     shares: 136,
@@ -988,7 +1012,7 @@ export const TOP_POSTS_FORTNIGHT: TopPost[] = [
     id: 'tp3',
     brand: 'Wakefit',
     platform: 'Instagram',
-    caption: 'Mattress flip challenge — May giveaway launch',
+    caption: 'Mattress flip challenge May giveaway launch',
     reach: 38600,
     likes: 205,
     shares: 91,
@@ -997,9 +1021,9 @@ export const TOP_POSTS_FORTNIGHT: TopPost[] = [
   },
   {
     id: 'tp4',
-    brand: 'FK',
+    brand: 'Flipkart',
     platform: 'X',
-    caption: 'Filter coffee vs cold brew — the eternal debate thread',
+    caption: 'Filter coffee vs cold brew the eternal debate thread',
     reach: 11755,
     likes: 115,
     shares: 8,
@@ -1010,7 +1034,7 @@ export const TOP_POSTS_FORTNIGHT: TopPost[] = [
     id: 'tp5',
     brand: 'Epigamia',
     platform: 'Instagram',
-    caption: 'Greek yogurt parfait stack — recipe reel',
+    caption: 'Greek yogurt parfait stack recipe reel',
     reach: 25000,
     likes: 670,
     shares: 25,

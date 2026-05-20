@@ -33,7 +33,7 @@ export default function PersonDetail() {
     [extraNotes, baseNotes],
   )
 
-  if (!person) return <Navigate to="/founder" replace />
+  if (!person) return <Navigate to="/admin" replace />
 
   const recent = allNotes.slice(0, 3)
 
@@ -56,7 +56,7 @@ export default function PersonDetail() {
   return (
     <div>
       <Link
-        to="/founder"
+        to="/admin"
         className="mb-6 inline-flex items-center gap-1.5 text-xs text-text-secondary transition-colors hover:text-text-primary"
       >
         <ArrowLeft size={14} />
@@ -156,7 +156,7 @@ export default function PersonDetail() {
       {/* Recent notes */}
       <section className="mb-8">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-muted">
-          Last 3 notes — 1:1 prep
+          Last 3 notes: 1:1 prep
         </h2>
         <div className="space-y-3">
           {recent.map((n) => (

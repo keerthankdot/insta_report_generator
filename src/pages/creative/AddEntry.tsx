@@ -65,7 +65,7 @@ export default function AddEntry() {
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight text-white">Log entry</h1>
         <p className="mt-1 text-sm text-white/50">
-          Fill before your pod meeting — every alternate Friday.
+          Fill before your pod meeting, every alternate Friday.
         </p>
       </header>
 
@@ -129,7 +129,7 @@ export default function AddEntry() {
             </Field>
             <Field label="Brand benchmark met?">
               <select value={form.benchmarkMet} onChange={(e) => set('benchmarkMet', e.target.value)} className="form-input">
-                <option value="" className="bg-[#0e1117]">—</option>
+                <option value="" className="bg-[#0e1117]">Select</option>
                 <option value="yes" className="bg-[#0e1117]">Yes</option>
                 <option value="no" className="bg-[#0e1117]">No</option>
               </select>
