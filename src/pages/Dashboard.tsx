@@ -1,4 +1,6 @@
 
+import { useState, useMemo } from 'react'
+import { TrendingUp } from 'lucide-react'
 import { Card, StatCard } from '../components/ui/Card'
 import { PostCard } from '../components/ui/PostCard'
 import { getCurrentUser } from '../lib/auth'
@@ -6,7 +8,16 @@ import {
   PEOPLE,
   CREATOR_FORTNIGHT,
   TOP_POSTS_FORTNIGHT,
+  BRAND_POSTS,
+  WEEKS,
+  formatNumber,
 } from '../lib/data'
+
+const WEEK_BASE_MS = new Date(2026, 2, 11).getTime()
+
+function weekIdxForDate(dateStr: string): number {
+  return Math.floor((new Date(dateStr).getTime() - WEEK_BASE_MS) / (7 * 86400000))
+}
 
 function greet(name: string) {
   const h = new Date().getHours()
@@ -18,62 +29,110 @@ export default function Dashboard() {
   const user = getCurrentUser()!
   const isAdmin = user.role === 'admin' || user.role === 'manager'
 
-  // Role-aware brand visibility
-  // brands unused values hardcoded
+  const [fromIdx, setFromIdx] = useState(0)
+  const [toIdx, setToIdx] = useState(WEEKS.length - 1)
 
+  const rangeLabel = fromIdx === toIdx
+    ? WEEKS[fromIdx]
+    : `${WEEKS[fromIdx]} – ${WEEKS[toIdx]}`
 
+  // All brand posts flattened
+  const allPosts = useMemo(() => Object.values(BRAND_POSTS).flat(), [])
 
-  const now = new Date()
-  const today = now.toLocaleDateString('en-IN', {
-    weekday: 'long', day: 'numeric', month: 'long',
-  })
+  // Filter posts by selected week range
+  const filteredPosts = useMemo(() =>
+    allPosts.filter((p) => {
+      const idx = weekIdxForDate(p.date)
+      return idx >= fromIdx && idx <= toIdx
+    }),
+    [allPosts, fromIdx, toIdx]
+  )
 
-  // ISO week number + range
-  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
-  const day = d.getUTCDay() || 7
-  d.setUTCDate(d.getUTCDate() + 4 - day)
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-  const weekNumber = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
+  // Aggregate stats from filtered posts
+  const stats = useMemo(() => {
+    const igPosts = filteredPosts.filter(p => p.platform === 'Instagram')
+    const totalReach = igPosts.reduce((s, p) => s + (p.reach ?? 0), 0)
+    const totalShares = filteredPosts.reduce((s, p) => s + (p.shares ?? 0), 0)
+    const postCount = filteredPosts.length
+    const avgEr = igPosts.length > 0
+      ? igPosts.reduce((s, p) => s + (p.er ?? 0), 0) / igPosts.length
+      : 0
+    return { totalReach, totalShares, postCount, avgEr }
+  }, [filteredPosts])
 
-  // Weeks are Wed–Wed. Find the most recent Wednesday, then viewing = previous Wed cycle.
-  const daysSinceWed = (now.getDay() + 4) % 7 // 0 on Wed, 1 on Thu, ..., 6 on Tue
-  const thisWed = new Date(now)
-  thisWed.setDate(now.getDate() - daysSinceWed)
-  const prevWedStart = new Date(thisWed)
-  prevWedStart.setDate(thisWed.getDate() - 7)
-  const prevWedEnd = new Date(thisWed)
-  prevWedEnd.setDate(thisWed.getDate() - 1) // Tue before current Wed
-  const fmt = (dt: Date) => `${dt.getDate()} ${dt.toLocaleDateString('en-GB', { month: 'short' })}`
-  const weekRange = `${fmt(prevWedStart)} to ${fmt(prevWedEnd)}`
+  // Filter top posts by range
+  const filteredTopPosts = useMemo(() =>
+    TOP_POSTS_FORTNIGHT.filter((p) => {
+      const idx = weekIdxForDate(p.date)
+      return idx >= fromIdx && idx <= toIdx
+    }),
+    [fromIdx, toIdx]
+  )
 
   return (
     <div>
       {/* Header */}
-      <header className="mb-8">
-        <p className="mb-1 text-xs text-white/40">{today}</p>
+      <header className="mb-6">
         <h1 className="text-3xl font-semibold tracking-tight text-white">{greet(user.name)}</h1>
-        <p className="mt-1 text-sm text-white/50">You are viewing Week {weekNumber - 1} <span className="text-white/30">·</span> {weekRange}</p>
       </header>
 
-      {/* 5 stat cards */}
-      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
-        <StatCard label="Brands" value="6" />
-        <StatCard label="Reach" value="10.1L" delta={8.2} />
-        <StatCard label="Shares" value="2.5k" delta={-3.4} />
-        <StatCard label="Posts" value="54" delta={12.0} />
-        <StatCard label="Avg Eng Rate" value="1.65%" delta={-0.3} />
+      {/* Date range filter */}
+      <div className="mb-6 flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 px-4 py-3">
+        <TrendingUp size={13} className="flex-shrink-0 text-white/40" />
+        <span className="text-xs text-white/40">Showing</span>
+        <select
+          value={fromIdx}
+          onChange={(e) => {
+            const v = Number(e.target.value)
+            setFromIdx(v)
+            if (v > toIdx) setToIdx(v)
+          }}
+          className="rounded-lg border border-white/8 bg-[#1c1c1e] px-2.5 py-1.5 text-xs font-medium text-white focus:outline-none"
+        >
+          {WEEKS.map((w, i) => (
+            <option key={w} value={i} className="bg-[#1c1c1e]">{w}</option>
+          ))}
+        </select>
+        <span className="text-xs text-white/30">to</span>
+        <select
+          value={toIdx}
+          onChange={(e) => {
+            const v = Number(e.target.value)
+            setToIdx(v)
+            if (v < fromIdx) setFromIdx(v)
+          }}
+          className="rounded-lg border border-white/8 bg-[#1c1c1e] px-2.5 py-1.5 text-xs font-medium text-white focus:outline-none"
+        >
+          {WEEKS.map((w, i) => (
+            <option key={w} value={i} className="bg-[#1c1c1e]">{w}</option>
+          ))}
+        </select>
+        <span className="ml-auto text-xs text-white/30">
+          {toIdx - fromIdx + 1} week{toIdx - fromIdx + 1 !== 1 ? 's' : ''}
+        </span>
       </div>
 
+      {/* Stat cards */}
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard label="Posts" value={String(stats.postCount)} />
+        <StatCard label="Reach" value={formatNumber(stats.totalReach)} />
+        <StatCard label="Shares" value={formatNumber(stats.totalShares)} />
+        <StatCard label="Avg Eng Rate" value={`${stats.avgEr.toFixed(2)}%`} />
+      </div>
 
       {/* Top performing posts */}
       <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-white">
-        Top performing posts in Week {weekNumber - 1}
+        Top performing posts · {rangeLabel}
       </h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {TOP_POSTS_FORTNIGHT.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
-      </div>
+      {filteredTopPosts.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredTopPosts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-white/30">No top posts for this range.</p>
+      )}
 
       {/* Team section admins only */}
       {isAdmin && (
@@ -107,4 +166,3 @@ export default function Dashboard() {
     </div>
   )
 }
-
